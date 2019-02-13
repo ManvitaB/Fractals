@@ -16,18 +16,11 @@ import javax.imageio.ImageIO;
  * @created     02/12/2019
  * @last_edit   02/12/2019
  */
-public class FractalTree
+public class FractalTree extends Fractal2D
 {
-	protected int width;			  //width  of fractal image to generate
-	protected int height;			  //height of fractal image to generate
-	protected int padding_horizontal; //padding (px) for left/right sides of generated image
-	protected int padding_vertical;   //padding (px) for top/bottom sides of generated image
-	protected int totalIterations;
 	protected double angle;		      //angle (radians) created between existing line segment
 	protected double scalingFactor;	  //factor to scale line segment length by each iteration
 	
-	private BufferedImage image;
-	private Graphics2D gfx;
 	private static double initialSegmentLengthFactor = 0.20; //set initial segmentLength to be 20% of usableHeight's value
 	private static double initialAngle_deg = 90; //initial angle (degrees) of the 1st line segment
 	
@@ -53,47 +46,6 @@ public class FractalTree
 		this.padding_vertical = padding_vertical;
 		image = null;
 		gfx = null;
-	}
-	
-	/**
-	 * Output this generated FractalTree to a location on disk as an image.
-	 * @param relativePath Directory relative to this classpath to create the file.
-	 * @param filename Name of the file to create in directory relativePath.
-	 * @param imageType Type of image to create (e.g. "png")
-	 * @return Absolute path of the image file created on disk.
-	 * @throws Exception If I/O error occurred.
-	 */
-	public String outputToFile(String relativePath, String filename, String imageType) throws Exception
-	{
-		final String msgPrefix = "FractalTree.outputToFile: ";
-		ClassLoader classLoader = getClass().getClassLoader();
-		URL classpath = classLoader.getResource(".");
-		File outputDirectory = new File(classpath.getPath() + relativePath);
-		
-		//1. Create output directory if doesn't exist already
-		if(!outputDirectory.exists()) {
-			System.out.println(msgPrefix + "attempting to create non-existant directory '" + outputDirectory.getAbsolutePath() + "'");
-			if(outputDirectory.mkdirs()) {
-				System.out.println(msgPrefix + "created new directory successfully.");
-			} else {
-				throw new Exception(msgPrefix + "could not make directory at '" + outputDirectory.getAbsolutePath() + "'.");
-			}
-		}
-		
-		//2. Create output file if doesn't exist already
-		File outputfile = new File(classpath.getPath() + relativePath + filename);
-		String fullpath = outputfile.getAbsolutePath();
-		if(!outputfile.exists()) {
-			System.out.println(msgPrefix + "attempt to create new file at path '" + outputfile.getAbsolutePath() + "'");
-			outputfile.createNewFile();
-			System.out.println(msgPrefix + "created new file successfully.");
-		} else {
-			System.out.println(msgPrefix + "overwriting existing file at '" + outputfile.getAbsolutePath() + "'");
-		}
-		
-		//3. Write image to file
-		ImageIO.write(image, imageType, outputfile);
-		return fullpath;
 	}
 	
 	/**
@@ -143,11 +95,5 @@ public class FractalTree
 		iterate(endX, endY, lchild_endX, lchild_endY, lchild_angle, childSegmentLength, iterationsRemaining - 1); //left child
 		iterate(endX, endY, rchild_endX, rchild_endY, rchild_angle, childSegmentLength, iterationsRemaining - 1); //right child
 	}
-	
-	private void drawLine(double startX, double startY, double endX, double endY) {
-		Line2D line = new Line2D.Double(startX, startY, endX, endY);
-		gfx.draw(line);
-	}
-	
 	
 }
