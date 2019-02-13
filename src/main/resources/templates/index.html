@@ -3,17 +3,21 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	<title>Fractals</title>
+	<link href="css/style.css" rel="stylesheet">
+	<script src="js/includeHTML.js"></script>
 </head>
-<body>
+<body onload="includeHTML();">
+	<div class="center-text-full">
 	<h1>Fractals</h1>
 	<p>Welcome! Fractals is a web tool for generating fractals via recursion for a set amount of iterations.</p>
 	<p>View and play around with a fractal tree <a href="/fractal-tree">here</a>!</p>
-	<img th:src="@{images/example-fractal-tree.png}"/>
-	<br>
-	<small>
-		Fractals is a creation of 
-		<a href="https://github.com/smwolfskill">Scott Wolfskill</a>
-		and is run on Spring Framework in Java.
-	</small>
+	</div>
+	<img th:src="@{images/example-fractal-tree.png}" class="center-image"/>
+	<div class="center-text-full">
+		<p> Fractals is open-source on GitHub, available 
+			<a href="https://github.com/smwolfskill/Fractals">here</a>.
+	</div>
 </body>
+<div w3-include-html="_footer.html"></div>
+
 </html>
