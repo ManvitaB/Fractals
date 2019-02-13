@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>Fractals with Spring Framework</title>
+</head>
+<body>
+	<h2>Fractal Tree</h3>
+	<h3>Parameters</h3>
+	<p th:text="'Size: ' + ${width} + ' x ' + ${height}"/>
+	<p th:text="'Iterations: ' + ${iterations}"/>
+	<p th:text="'Angle: ' + ${angle} + '&deg'"/>
+	<p th:text="'Scaling factor: ' + ${factor}"/>
+	<img th:src="@{images/fractal-tree.png}"/>
+	<br>
+	<small th:text="${loadingMessage}"/>
+</body>
+</html>
