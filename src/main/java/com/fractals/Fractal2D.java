@@ -1,6 +1,7 @@
 package com.fractals;
 
 import java.awt.Graphics2D;
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -29,6 +30,18 @@ public abstract class Fractal2D extends Fractal
 	 * running for totalIterations iterations.
 	 */
 	public abstract void generate();
+	
+	protected void initialize(int width, int height, int iterations,
+							  int padding_horizontal, int padding_vertical)
+	{
+		this.width = width;
+		this.height = height;
+		this.totalIterations = iterations;
+		this.padding_horizontal = padding_horizontal;
+		this.padding_vertical = padding_vertical;
+		image = null;
+		gfx = null;
+	}
 	
 	/**
 	 * Output this generated FractalTree to a location on disk as an image.
@@ -71,8 +84,25 @@ public abstract class Fractal2D extends Fractal
 		return fullpath;
 	}
 	
-	protected void drawLine(double startX, double startY, double endX, double endY) {
+	protected void generateImage()
+	{
+		image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+		gfx = image.createGraphics();
+	}
+	
+	protected void drawLine(double startX, double startY, double endX, double endY)
+	{
 		Line2D line = new Line2D.Double(startX, startY, endX, endY);
 		gfx.draw(line);
+	}
+	
+	protected void drawEllipse(double centerX, double centerY, double width, double height)
+	{
+		//Ellipse2D.Double constructor generates ellipse 
+		//whose leftmost point is at minX and whose topmost point is at minY
+		double minX = centerX - (width / 2);
+		double minY = centerY - (height / 2);
+		Ellipse2D.Double ellipse = new Ellipse2D.Double(minX, minY, width, height);
+		gfx.draw(ellipse);
 	}
 }

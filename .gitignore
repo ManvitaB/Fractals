@@ -1,6 +1,6 @@
 /target/
 !.mvn/wrapper/maven-wrapper.jar
-images/fractal-tree*
+images/fractal*
 
 ### STS ###
 .apt_generated

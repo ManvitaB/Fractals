@@ -4,9 +4,8 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	<title>Fractals</title>
 	<link href="css/style.css" rel="stylesheet">
-	<script src="js/includeHTML.js"></script>
 </head>
-<body onload="includeHTML();">
+<body>
 	<div class="center-text-full">
 	<h1>Fractals</h1>
 	<p>Welcome! Fractals is a web tool for generating fractals via recursion for a set amount of iterations.</p>
@@ -18,6 +17,7 @@
 			<a href="https://github.com/smwolfskill/Fractals">here</a>.
 	</div>
 </body>
-<div w3-include-html="_footer.html"></div>
+
+<div th:replace="fragments/_footer.html :: footer"></div>
 
 </html>

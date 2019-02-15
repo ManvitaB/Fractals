@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<link href="css/style.css" rel="stylesheet">
+</head>
+	<form th:fragment="params" action="/fractal-circle">
+		<p>Width: <input type="text" class="input-text" name="w" th:value="${width}"> px</p>
+		<p>Height: <input type="text" class="input-text" name="h" th:value="${height}"> px</p>
+		<p>Iterations: <input type="text" class="input-text" name="i" th:value="${iterations}"></p>
+		<p>Satellites: <input type="text" class="input-text" name="satellites" th:value="${satellites}"> per iteration</p>
+		<p>Scaling Factor: <input type="text" class="input-text" name="factor" th:value="${factor}"></p>
+		<p><input type="submit" class="submit" value="Generate"></p>
+	</form>
+</html>

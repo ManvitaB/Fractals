@@ -1,30 +1,23 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-	<title>Fractal Tree</title>
+	<title th:text=${title}></title>
 	<link href="css/style.css" rel="stylesheet">
-	<script src="js/includeHTML.js"></script>
 </head>
-<body onload="includeHTML();">
+<body th:fragment="mainPage(page, fragment)">
 	<div class="column-left">
-	<h3>Parameters</h3>
-	<form action="/fractal-tree">
-		<p>Width: <input type="text" class="input-text" name="w" th:value="${width}"> px</p>
-		<p>Height: <input type="text" class="input-text" name="h" th:value="${height}"> px</p>
-		<p>Iterations: <input type="text" class="input-text" name="i" th:value="${iterations}"></p>
-		<p>Angle: <input type="text" class="input-text" name="angle" th:value="${angle}" th:text="'&deg'"></p>
-		<p>Scaling Factor: <input type="text" class="input-text" name="factor" th:value="${factor}"></p>
-		<p><input type="submit" class="submit" value="Generate"></p>
-	</form>
+		<h3>Parameters</h3>
+		<div th:replace="${params_page} :: ${params_fragment}"></div>
 	</div>
 	
 	<div class="column-center">
-	<h2>Fractal Tree</h2>
-	<img th:src="@{images/fractal-tree.png}"/><br>
-	<small th:text="${loadingMessage}"/>
+	<h2 th:text=${title}></h2>
+	<img th:src="${imagePath}"/><br>
+	<small th:text="${loadingMessage}"></small>
 	</div>
 </body>
-<div w3-include-html="_footer.html"></div>
 
+<div th:replace="fragments/_footer.html :: footer"></div>
 </html>
