@@ -2,11 +2,12 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+	<meta http-equiv="Cache-control" content="NO-CACHE"/>
 	<title th:text=${title}></title>
 	<link href="css/style.css" rel="stylesheet">
 </head>
-<body th:fragment="mainPage(page, fragment)">
+<body th:fragment="mainPage(page, fragment)" onload="start();">
 	<div class="column-left">
 		<h3>Parameters</h3>
 		<div th:replace="${params_page} :: ${params_fragment}"></div>
@@ -14,11 +15,44 @@
 	
 	<div class="column-center">
 		<h2 th:text=${title}></h2>
-		<img th:src="${imagePath}"/><br>
-		<small th:text="${loadingMessage}"></small>
+		<img id="fractalImage" th:src="${imagePath}"/><br>
+		<small id="loadingMessage" th:text="${loadingMessage}"></small>
 	</div>
 	
 </body>
 
 <div th:replace="fragments/_footer.html :: footer"></div>
+
+<script type="text/javascript">
+	var fractalImage_src; 
+	
+	function start() {
+		printCurrentTime();
+		var image = document.getElementById("fractalImage");
+		fractalImage_src = image.getAttribute("src");
+		setInterval(update, 200); //call update once every 200ms
+		update();
+	}
+	
+	function update() {
+		var loadingMessage = document.getElementById("loadingMessage").textContent;
+		if(loadingMessage == "Generating...") {
+			//Check if there is new content to load.
+			var image = document.getElementById("fractalImage");
+			image.setAttribute("src", fractalImage_src + "?	" + new Date().getTime());
+			/*var imageSrc = image.getAttribute("src");
+			var new_image = new Image();
+			new_image.id = "fractalImage";
+			new_image.src = imageSrc;
+			image.parentNode.insertBefore(new_image,image);
+	        image.parentNode.removeChild(image);*/
+		}
+	}
+	
+	function printCurrentTime() {
+		var now = new Date();
+		console.log(now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds()
+				+ ":" + now.getMilliseconds() + "   (hh:mm:ss:xxx)");
+	}
+</script>
 </html>

@@ -1,13 +1,15 @@
 package com.fractals;
 
 import java.awt.geom.Ellipse2D;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * FractalCircle --- Represents a Fractal2D created by drawing orbiting circles around a parent
  * 					 for a set number of iterations.
  * @author Scott Wolfskill
  * @created     02/14/2019
- * @last_edit   02/14/2019
+ * @last_edit   02/18/2019
  */
 public class FractalCircle extends Fractal2D 
 {
@@ -40,7 +42,7 @@ public class FractalCircle extends Fractal2D
 	@Override
 	public void generate()
 	{
-		generateImage();
+		initImage();
 		double usableWidth = width - 2 * padding_horizontal;
 		double usableHeight = height - 2 * padding_horizontal;
 		double centerX = width / 2;
@@ -51,11 +53,16 @@ public class FractalCircle extends Fractal2D
 	
 	private void iterate(double centerX, double centerY, double radius, int iterationsRemaining)
 	{
+		final String msgPrefix = "FractalCircle.iterate: ";
+		if(cancelled != null && cancelled.get()) {
+			//System.out.println(msgPrefix + "cancelled!");
+			return;
+		}
 		if(iterationsRemaining == 0) {
 			return;
 		}
 		if(radius <= 0) {
-			System.out.println("FractalCircle.iterate: radius (" + radius + ") became too small! ");
+			System.out.println(msgPrefix + " radius (" + radius + ") became too small! ");
 			return;
 		}
 		//1. Draw parent circle at (centerX, centerY)
