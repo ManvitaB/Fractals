@@ -41,7 +41,7 @@ ul {
 	margin: 0;
 	padding: 1em;
 	line-height: 28px;
-	width: 270px;
+	width: 18%;
 }
 
 .column-right {
@@ -50,7 +50,7 @@ ul {
     margin: 0;
     padding: 1em;
     line-height: 28px;
-    width: 270px;
+    width: 18%;
 }
 
 .column-center {
@@ -60,6 +60,7 @@ ul {
 	margin-bottom: 20px;
 	padding-bottom: 20px;
 	position: absolute;
+	width: 64%;
 }
 
 .input-text {

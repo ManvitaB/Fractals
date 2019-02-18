@@ -13,10 +13,11 @@
 	</div>
 	
 	<div class="column-center">
-	<h2 th:text=${title}></h2>
-	<img th:src="${imagePath}"/><br>
-	<small th:text="${loadingMessage}"></small>
+		<h2 th:text=${title}></h2>
+		<img th:src="${imagePath}"/><br>
+		<small th:text="${loadingMessage}"></small>
 	</div>
+	
 </body>
 
 <div th:replace="fragments/_footer.html :: footer"></div>
