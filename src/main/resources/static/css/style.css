@@ -3,6 +3,14 @@ body {
 	padding-bottom: 18px;
 }
 
+ul {
+	list-style-type: circle;
+	display: block;
+	margin-left: 40%;
+	margin-right: 40%;
+	text-align:left;
+}
+
 .center-text {
   display: block;
   margin-left: auto;

@@ -1,6 +1,7 @@
 /target/
 !.mvn/wrapper/maven-wrapper.jar
 images/fractal*
+IDEAS.txt
 
 ### STS ###
 .apt_generated

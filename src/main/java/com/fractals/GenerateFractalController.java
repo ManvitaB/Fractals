@@ -77,7 +77,7 @@ public class GenerateFractalController
 	public String generateFractalCircle(
 			@RequestParam(name="w", required=false, defaultValue="700") int width,
 			@RequestParam(name="h", required=false, defaultValue="500") int height,
-			@RequestParam(name="i", required=false, defaultValue="10") int iterations,
+			@RequestParam(name="i", required=false, defaultValue="4") int iterations,
 			@RequestParam(name="satellites", required=false, defaultValue="4") int satellites,
 			@RequestParam(name="factor", required=false, defaultValue="0.5") double factor,
 			@RequestParam(name="padding_w", required=false, defaultValue="40") int padding_w,

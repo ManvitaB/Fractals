@@ -9,3 +9,9 @@ size: 700 x 500
 iterations: 4
 satellites: 10
 scaling factor: 0.5
+
+example-fractal-circle-sierpinski.png was generated with these parameters:
+size: 700 x 500
+iterations: 10
+satellites: 3
+scaling factor: 0.54
