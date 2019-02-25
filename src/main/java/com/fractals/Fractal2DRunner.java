@@ -2,6 +2,7 @@ package com.fractals;
 
 import java.util.Date;
 import java.util.concurrent.CompletableFuture;
+
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -10,14 +11,13 @@ import org.springframework.stereotype.Service;
  * 					   asynchronously via CompletableFuture<T>.
  * @author Scott Wolfskill
  * @created     02/18/2019
- * @last_edit   02/18/2019
+ * @last_edit   02/25/2019
  */
 @Service
 public class Fractal2DRunner 
 {
 	private Fractal2D fractal2D;
 	private CompletableFuture<String> runner;
-	
 	
 	public interface ModelParamSetter
 	{
@@ -44,11 +44,6 @@ public class Fractal2DRunner
 		this.fractal2D = fractal2D;
 		runner = CompletableFuture.supplyAsync(() -> {
 			System.out.println("Fractal2D runner started.");
-			try {
-				Thread.sleep(3000L);
-			} catch (InterruptedException e) {
-				
-			}
 			//1. Generate fractal2D
 			String loadingMessage;
 			fractal2D.generate();
