@@ -6,6 +6,11 @@ import java.awt.geom.Line2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -17,7 +22,7 @@ import javax.imageio.ImageIO;
  * 				 that is generated on an image and can be saved to the disk.
  * @author Scott Wolfskill
  * @created     02/12/2019
- * @last_edit   02/18/2019
+ * @last_edit   02/25/2019
  */
 public abstract class Fractal2D extends Fractal 
 {
@@ -50,14 +55,15 @@ public abstract class Fractal2D extends Fractal
 	}
 	
 	/**
-	 * Output this generated FractalTree to a location on disk as an image.
+	 * Output this generated FractalTree to a location on disk as an image,
+	 * and output a generation message in the same directory at relativePath.
 	 * @param relativePath Directory relative to this classpath to create the file.
 	 * @param filename Name of the file to create in directory relativePath.
 	 * @param imageType Type of image to create (e.g. "png")
 	 * @return Absolute path of the image file created on disk.
 	 * @throws Exception If I/O error occurred, or if cancelled.
 	 */
-	public String outputToFile(String relativePath, String filename, String imageType) throws Exception
+	public String outputToFile(String relativePath, String imageFilename, String imageType) throws Exception
 	{
 		final String msgPrefix = "Fractal2D.outputToFile: ";
 		if(cancelled != null && cancelled.get()) {
@@ -79,15 +85,16 @@ public abstract class Fractal2D extends Fractal
 			}
 		}
 		
-		//2. Create output file if doesn't exist already
-		File outputfile = new File(classpath.getPath() + relativePath + filename);
-		String fullpath = outputfile.getAbsolutePath();
-		if(!outputfile.exists()) {
-			System.out.println(msgPrefix + "attempt to create new file at path '" + outputfile.getAbsolutePath() + "'");
-			outputfile.createNewFile();
+		//2. Create output image file and message file if any don't exist already
+		String fullRelativePath = classpath.getPath() + relativePath;
+		File outputImageFile = new File(fullRelativePath + imageFilename);
+		String fullpath = outputImageFile.getAbsolutePath();
+		if(!outputImageFile.exists()) {
+			System.out.println(msgPrefix + "attempt to create new file at path '" + outputImageFile.getAbsolutePath() + "'");
+			outputImageFile.createNewFile();
 			System.out.println(msgPrefix + "created new file successfully.");
 		} else {
-			System.out.println(msgPrefix + "overwriting existing file at '" + outputfile.getAbsolutePath() + "'");
+			System.out.println(msgPrefix + "overwriting existing file at '" + outputImageFile.getAbsolutePath() + "'");
 		}
 		
 		//3. Write image to file (if operation not cancelled)
@@ -95,7 +102,7 @@ public abstract class Fractal2D extends Fractal
 			//System.out.println(msgPrefix + "cancelled!");
 			throw new CancellationException("Image writing to disk was cancelled.");
 		}
-		ImageIO.write(image, imageType, outputfile);
+		ImageIO.write(image, imageType, outputImageFile);
 		return fullpath;
 	}
 	

@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 
 /**
  * Fractal2DRunner --- Generates and outputs a Fractal2D as an image to the disk 
- * 					   asynchronously via CompletableFuture<T>.
+ * 					   asynchronously via CompletableFuture<String>.
  * @author Scott Wolfskill
  * @created     02/18/2019
  * @last_edit   02/25/2019
@@ -21,16 +21,27 @@ public class Fractal2DRunner
 	
 	public interface ModelParamSetter
 	{
+		/**
+		 * Method that typically updates a Thymeleaf page model attribute with loadingMessage.
+		 * @param loadingMessage Status message on fractal generation.
+		 */
 		public void setModelParams(String loadingMessage);
 	}
-	
 	
 	public Fractal2DRunner() {
 		this.fractal2D = null;
 		this.runner = null;
 	}
 	
-	public void generateAndOutputToFile(ModelParamSetter modelParamMethod, Fractal2D fractal2D,
+	/**
+	 * Queues a Fractal2D for asynchronous generation/output to file as PNG image
+	 * at relativePath/filename, using CompletableFuture. Optionally cancels in-progress generation task first.
+	 * @param modelParamSetter Interface (typically lambda exp.) implementing ModelParamSetter.
+	 * @param relativePath Relative directory that filename is within.
+	 * @param filename Filename (with extension) of the image to output the generated fractal to.
+	 * @param cancelIfRunning If true, will cancel an in-progress generation before starting the new generation. 
+	 */
+	public void generateAndOutputToFile(ModelParamSetter modelParamSetter, Fractal2D fractal2D,
 			String relativePath, String filename, boolean cancelIfRunning) 
 	{
 		Date start = new Date();
@@ -62,7 +73,7 @@ public class Fractal2DRunner
 			}
 			
 			//3. Update Thymeleaf page model's params and return
-			modelParamMethod.setModelParams(loadingMessage);
+			modelParamSetter.setModelParams(loadingMessage);
 			if(fractal2D.cancelled.get()) {
 				System.out.println("Cancelled Fractal2D runner finished.");
 			} else {

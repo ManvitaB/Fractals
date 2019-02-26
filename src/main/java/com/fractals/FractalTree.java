@@ -17,7 +17,7 @@ import javax.imageio.ImageIO;
  * 				   with a specified angle between them for each existing node every iteration.
  * @author Scott Wolfskill
  * @created     02/12/2019
- * @last_edit   02/18/2019
+ * @last_edit   02/25/2019
  */
 public class FractalTree extends Fractal2D
 {
@@ -74,7 +74,6 @@ public class FractalTree extends Fractal2D
 	{
 		final String msgPrefix = "FractalTree.iterate: ";
 		if(cancelled != null && cancelled.get()) {
-			//System.out.println(msgPrefix + "cancelled!");
 			return;
 		}
 		if(iterationsRemaining == 0) {

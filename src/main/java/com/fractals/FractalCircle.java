@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * 					 for a set number of iterations.
  * @author Scott Wolfskill
  * @created     02/14/2019
- * @last_edit   02/18/2019
+ * @last_edit   02/25/2019
  */
 public class FractalCircle extends Fractal2D 
 {
@@ -55,7 +55,6 @@ public class FractalCircle extends Fractal2D
 	{
 		final String msgPrefix = "FractalCircle.iterate: ";
 		if(cancelled != null && cancelled.get()) {
-			//System.out.println(msgPrefix + "cancelled!");
 			return;
 		}
 		if(iterationsRemaining == 0) {
