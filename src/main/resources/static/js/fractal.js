@@ -4,7 +4,7 @@
  * 				  be output to fractalImage_src upon completion.
  * @author Scott Wolfskill
  * @created     02/25/2019
- * @last_edit   02/25/2019
+ * @last_edit   02/26/2019
  */
 
 var fractalImage_src;
@@ -15,8 +15,16 @@ var fractalImage_src;
  */
 function start() {
 	var image = document.getElementById("fractalImage");
-	fractalImage_src = image.getAttribute("src");
+	fractalImage_src = stripQueryString(image.getAttribute("src"));
 	setInterval(update, 200); // call update once every 200ms
+	/* If want to set custom image source as URI parameter, uncomment these lines:
+	var inputSrc = document.createElement("input");
+	inputSrc.setAttribute("type", "hidden");
+	inputSrc.setAttribute("id", "inputSrc")
+	inputSrc.setAttribute("name", "src");
+	var frmParams = document.getElementById("frmParams");
+	frmParams.appendChild(inputSrc);
+	*/
 	update();
 }
 
@@ -28,12 +36,23 @@ function update() {
 	var loadingMessage = document.getElementById("loadingMessage").textContent;
 	if (loadingMessage == "Generating...") {
 		console.log("Querying server for generation status...");
-		//Check if there is new content to load.
-		var image = document.getElementById("fractalImage");
-		image.setAttribute("src", fractalImage_src + "?	"
-				+ new Date().getTime());
+		//Make sure browser keeps checking if there is new content to load.
+		setImageSrc_noCache();
 		getLoadingMessage();
 	}
+}
+
+/**
+ * Sets element "fractalImage" to not cache while it is being generated on the server.
+ */
+function setImageSrc_noCache() {
+	var newSrc = fractalImage_src + "?" + new Date().getTime();
+	var image = document.getElementById("fractalImage");
+	image.setAttribute("src", newSrc);
+	/* If want to set custom image source as URI parameter, uncomment these lines:
+	var inputSrc = document.getElementById("inputSrc");
+	inputSrc.setAttribute("value", newSrc);
+	*/
 }
 
 /**
@@ -51,6 +70,27 @@ function getLoadingMessage() {
 	}
 	xhttp.open("GET", "/get-loading-message", true);
 	xhttp.send();
+}
+
+/**
+ * Remove a query string from input, if present.
+ * e.g. if input="images/fractal-tree.png?112334", return "images/fractal-tree.png"
+ * @param input String to remove the query string from, if present.
+ * @returns input with query string removed from the end.
+ */
+function stripQueryString(input) {
+	var chars = input.split("");
+	var start = 0;
+	var end = chars.length;
+	for(var i = end - 1; i >= 0; i--) {
+		if(chars[i] == '?') { 
+			// Don't include query part of filename (if present)
+			// e.g. exclude "?112334" in "images/fractal-tree.png?112334"
+			end = i;
+			break;
+		}
+	}
+	return input.substring(start, end);
 }
 
 /**

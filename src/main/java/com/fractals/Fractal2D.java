@@ -41,6 +41,22 @@ public abstract class Fractal2D extends Fractal
 	 */
 	public abstract void generate();
 	
+	public boolean equals(Fractal2D other)
+	{
+		if(other == null) {
+			return false;
+		}
+		if(totalIterations != other.totalIterations ||
+		   width != other.width ||
+		   height != other.height ||
+		   padding_horizontal != other.padding_horizontal ||
+		   padding_vertical != other.padding_vertical) 
+		{
+			return false;
+		}
+		return true;
+	}
+	
 	protected void initialize(int width, int height, int iterations,
 							  int padding_horizontal, int padding_vertical)
 	{

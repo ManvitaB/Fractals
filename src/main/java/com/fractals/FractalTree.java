@@ -46,6 +46,27 @@ public class FractalTree extends Fractal2D
 		this.scalingFactor = scalingFactor;
 	}
 	
+	@Override
+	public boolean equals(Fractal2D other)
+	{
+		if(!super.equals(other)) //first, check basic comparison with Fractal2D.equals
+		{
+			return false;
+		}
+		try {
+			FractalTree o = (FractalTree) other;
+			if(angle != o.angle ||
+			   scalingFactor != o.scalingFactor)
+			{
+				return false;
+			}
+		} catch (Exception e) {
+			System.out.println("FractalTree.equals: Exception '" + e.getMessage() + "'.");
+			return false;
+		}
+		return true;
+	}
+	
 	/**
 	 * Generates the FractalTree on image by running for totalIterations iterations.
 	 */

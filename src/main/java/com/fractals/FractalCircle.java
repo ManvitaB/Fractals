@@ -36,6 +36,27 @@ public class FractalCircle extends Fractal2D
 		this.scalingFactor = scalingFactor;
 	}
 	
+	@Override
+	public boolean equals(Fractal2D other)
+	{
+		if(!super.equals(other)) //first, check basic comparison with Fractal2D.equals
+		{
+			return false;
+		}
+		try {
+			FractalCircle o = (FractalCircle) other;
+			if(satelliteCount != o.satelliteCount ||
+			   scalingFactor != o.scalingFactor)
+			{
+				return false;
+			}
+		} catch (Exception e) {
+			System.out.println("FractalTree.equals: Exception '" + e.getMessage() + "'.");
+			return false;
+		}
+		return true;
+	}
+	
 	/**
 	 * Generates the FractalCircle on image by running for totalIterations iterations.
 	 */
