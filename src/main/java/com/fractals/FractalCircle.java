@@ -4,19 +4,24 @@ import java.awt.geom.Ellipse2D;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import javax.persistence.Embeddable;
+
 /**
  * FractalCircle --- Represents a Fractal2D created by drawing orbiting circles around a parent
  * 					 for a set number of iterations.
  * @author Scott Wolfskill
  * @created     02/14/2019
- * @last_edit   02/25/2019
+ * @last_edit   02/27/2019
  */
+@Embeddable
 public class FractalCircle extends Fractal2D 
 {
 	protected int satelliteCount;   //Number of child node 'satellites' to generate per iteration
 	protected double scalingFactor; //Scaling factor for the radius of each child node in the fractal
 	
 	private static double initialRadiusFactor = 0.20; //set initial radius to be 20% of min(usableWidth, usableHeight)'s value
+	
+	public FractalCircle() {} //Embeddable must define default CTOR
 	
 	/**
 	 * Creates a non-generated FractalCircle with specified parameters.
@@ -99,6 +104,26 @@ public class FractalCircle extends Fractal2D
 			double childCenterY = radiiSum * Math.sin(childAngle_rad) + centerY;
 			iterate(childCenterX, childCenterY, childRadius, iterationsRemaining - 1);
 		}
+	}
+	
+	public int getSatelliteCount()
+	{
+		return satelliteCount;
+	}
+	
+	public void setSatelliteCount(int satelliteCount)
+	{
+		this.satelliteCount = satelliteCount;
+	}
+	
+	public double getScalingFactor()
+	{
+		return scalingFactor;
+	}
+	
+	public void setScalingFactor(double scalingFactor)
+	{
+		this.scalingFactor = scalingFactor;
 	}
 
 }

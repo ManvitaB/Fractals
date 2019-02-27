@@ -3,6 +3,7 @@
 images/fractal*
 IDEAS.txt
 IDEAS.docx
+/src/main/resources/application-default.properties
 
 ### STS ###
 .apt_generated

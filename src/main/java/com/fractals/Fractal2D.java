@@ -16,6 +16,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.imageio.ImageIO;
+import javax.persistence.Embeddable;
+import javax.persistence.Entity;
+import javax.persistence.MappedSuperclass;
 
 /**
  * Fractal2D --- Abstract class that represents a 2D Fractal
@@ -26,14 +29,15 @@ import javax.imageio.ImageIO;
  */
 public abstract class Fractal2D extends Fractal 
 {
-	public AtomicBoolean cancelled;   //thread-safe boolean. If true, current generation or writing to disk will be cancelled.
+	//transient keyword denotes won't be serialized or stored in DB
+	public transient AtomicBoolean cancelled;   //thread-safe boolean. If true, current generation or writing to disk will be cancelled.
 	
 	protected int width;			  //width  of fractal image to generate
 	protected int height;			  //height of fractal image to generate
 	protected int padding_horizontal; //padding (px) for left/right sides of generated image
 	protected int padding_vertical;   //padding (px) for top/bottom sides of generated image
-	protected BufferedImage image;    //image to draw the fractal onto
-	protected Graphics2D gfx;		  //Graphics of image
+	protected transient BufferedImage image;    //image to draw the fractal onto
+	protected transient Graphics2D gfx;		  //Graphics of image
 	
 	/**
 	 * Method for derived classes to implement to generate the fractal,
@@ -142,5 +146,45 @@ public abstract class Fractal2D extends Fractal
 		double minY = centerY - (height / 2);
 		Ellipse2D.Double ellipse = new Ellipse2D.Double(minX, minY, width, height);
 		gfx.draw(ellipse);
+	}
+	
+	public int getWidth()
+	{
+		return width;
+	}
+	
+	public void setWidth(int width)
+	{
+		this.width = width;
+	}
+	
+	public int getHeight()
+	{
+		return height;
+	}
+	
+	public void setHeight(int height)
+	{
+		this.height = height;
+	}
+	
+	public int getPadding_horizontal()
+	{
+		return padding_horizontal;
+	}
+	
+	public void setPadding_horizontal(int padding_horizontal)
+	{
+		this.padding_horizontal = padding_horizontal;
+	}
+	
+	public int getPadding_vertical()
+	{
+		return padding_vertical;
+	}
+	
+	public void setPadding_vertical(int padding_vertical)
+	{
+		this.padding_vertical = padding_vertical;
 	}
 }

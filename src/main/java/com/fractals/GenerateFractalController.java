@@ -1,18 +1,19 @@
 package com.fractals;
 
-import java.awt.List;
 import java.util.Date;
-import java.util.LinkedList;
-import java.util.function.Supplier;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.fractals.DB.FractalCircleEntity;
+import com.fractals.DB.FractalCircleEntityRepository;
+import com.fractals.DB.FractalTreeEntity;
+import com.fractals.DB.FractalTreeEntityRepository;
 
 /**
  * GenerateFractalController --- 
@@ -20,11 +21,16 @@ import org.springframework.web.bind.annotation.ResponseBody;
  * 		    and then display the fractal HTML page.
  * @author Scott Wolfskill
  * @created     02/12/2019
- * @last_edit   02/26/2019
+ * @last_edit   02/27/2019
  */
 @Controller
 public class GenerateFractalController 
 {
+	@Autowired
+	private FractalTreeEntityRepository fractalTreeEntries;
+	@Autowired
+	private FractalCircleEntityRepository fractalCircleEntries;
+	
 	private static Fractal2DRunner fractal2DRunner = null;
 	private static Model model = null;
 	
@@ -64,7 +70,11 @@ public class GenerateFractalController
 		double angle_rad = Math.toRadians(angle);
 		FractalTree fractalTree = new FractalTree(width, height, iterations, angle_rad,
 												  factor, padding_w, padding_h);
-		
+		//TODO temp remove: add FractalCircleEntity to the DB
+		FractalTreeEntity fractalTreeEntity = new FractalTreeEntity(fractalTree, fractalImagePath, "Generating...", 
+				new java.sql.Date(new Date().getTime()), new Boolean(false));
+		fractalTreeEntries.save(fractalTreeEntity);
+		//end temp
 		// Set FractalTree-specific attributes
 		model.addAttribute("angle", angle);
 		model.addAttribute("factor", factor);
@@ -74,6 +84,18 @@ public class GenerateFractalController
 				  "fragments/fractal-tree-params.html", model);
 		
 		return "fractal";
+	}
+	
+	@GetMapping("/db-all-trees")
+	public @ResponseBody Iterable<FractalTreeEntity> listDB_fractalTrees()
+	{
+		return fractalTreeEntries.findAll();
+	}
+	
+	@GetMapping("/db-all-circles")
+	public @ResponseBody Iterable<FractalCircleEntity> listDB_fractalCircles()
+	{
+		return fractalCircleEntries.findAll();
 	}
 	
 	/**
@@ -104,7 +126,11 @@ public class GenerateFractalController
 	{
 		FractalCircle fractalCircle = new FractalCircle(width, height, iterations, satellites,
 												  	    factor, padding_w, padding_h);
-
+		// TODO temp remove: add FractalTreeEntity to the DB
+		FractalCircleEntity fractalCircleEntity = new FractalCircleEntity(fractalCircle, fractalImagePath, "Generating...",
+				new java.sql.Date(new Date().getTime()), new Boolean(false));
+		fractalCircleEntries.save(fractalCircleEntity);
+		// end temp
 		// Set FractalCircle-specific attributes
 		model.addAttribute("satellites", satellites);
 		model.addAttribute("factor", factor);
