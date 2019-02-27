@@ -2,11 +2,12 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 	<title th:text=${title}></title>
 	<link href="css/style.css" rel="stylesheet">
+	<script src="js/fractal.js"></script>
 </head>
-<body th:fragment="mainPage(page, fragment)">
+<body th:fragment="mainPage(page, fragment)" onload="start();">
 	<div class="column-left">
 		<h3>Parameters</h3>
 		<div th:replace="${params_page} :: ${params_fragment}"></div>
@@ -14,11 +15,12 @@
 	
 	<div class="column-center">
 		<h2 th:text=${title}></h2>
-		<img th:src="${imagePath}"/><br>
-		<small th:text="${loadingMessage}"></small>
+		<img id="fractalImage" th:src="${imagePath}"/><br>
+		<small id="loadingMessage" th:text="${loadingMessage}"></small>
 	</div>
 	
 </body>
 
 <div th:replace="fragments/_footer.html :: footer"></div>
+
 </html>

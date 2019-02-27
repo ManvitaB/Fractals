@@ -7,6 +7,8 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.imageio.ImageIO;
 
@@ -15,7 +17,7 @@ import javax.imageio.ImageIO;
  * 				   with a specified angle between them for each existing node every iteration.
  * @author Scott Wolfskill
  * @created     02/12/2019
- * @last_edit   02/14/2019
+ * @last_edit   02/25/2019
  */
 public class FractalTree extends Fractal2D
 {
@@ -44,6 +46,27 @@ public class FractalTree extends Fractal2D
 		this.scalingFactor = scalingFactor;
 	}
 	
+	@Override
+	public boolean equals(Fractal2D other)
+	{
+		if(!super.equals(other)) //first, check basic comparison with Fractal2D.equals
+		{
+			return false;
+		}
+		try {
+			FractalTree o = (FractalTree) other;
+			if(angle != o.angle ||
+			   scalingFactor != o.scalingFactor)
+			{
+				return false;
+			}
+		} catch (Exception e) {
+			System.out.println("FractalTree.equals: Exception '" + e.getMessage() + "'.");
+			return false;
+		}
+		return true;
+	}
+	
 	/**
 	 * Generates the FractalTree on image by running for totalIterations iterations.
 	 */
@@ -60,21 +83,25 @@ public class FractalTree extends Fractal2D
 		double endX = startX;
 		double endY = startY - segmentLength;
 		double startAngle = Math.toRadians(initialAngle_deg);
-		generateImage();
-		/*gfx.setBackground(Color.DARK_GRAY);
-		gfx.clearRect(0, 0, width, height);
-		gfx.setColor(Color.blue);*/
+		initImage();
+		/*gfx.setBackground(Color.DARK_GRAY); //update the color to set as background color when clearRect is called
+		gfx.clearRect(0, 0, width, height); //set width x height region with background color only
+		gfx.setColor(Color.blue);*/ //set paint color to use in future draw calls
 		iterate(startX, startY, endX, endY, startAngle, segmentLength, totalIterations); //begin iterating (iterationsRemaining) times
 	}
 	
 	private void iterate(double startX, double startY, double endX, double endY, 
 						 double currAngle, double segmentLength, int iterationsRemaining)
 	{
+		final String msgPrefix = "FractalTree.iterate: ";
+		if(cancelled != null && cancelled.get()) {
+			return;
+		}
 		if(iterationsRemaining == 0) {
 			return;
 		}
 		if(segmentLength <= 0) {
-			System.out.println("FractalTree.iterate: segmentLength (" + segmentLength + ") became too small! ");
+			System.out.println(msgPrefix + "segmentLength (" + segmentLength + ") became too small! ");
 			return;
 		}
 		//1. Draw single parent line segment

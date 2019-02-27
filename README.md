@@ -19,7 +19,7 @@ This Fractal Tree was created with 14 iterations,
 an angle of 60 degrees between child nodes, 
 and a scaling factor of 0.77, meaning each child line segment is 77% as long as its parent.
 
-![Image of Fractal Tree](src/main/resources/static/images/example-fractal-tree.png)
+![Image of Fractal Tree](src/main/resources/static/examples/example-fractal-tree.png)
 ### Fractal Circles
 [FractalCircle](src/main/java/com/fractals/FractalCircle.java)
 generates a set number of child circle 'satellites' each iteration that intersect with the parent circle at a single point.
@@ -29,4 +29,4 @@ With *s* satellites, each iteration *i* generates *s*<sup>*i*</sup> circle satel
 These Fractal Circles were generated with only 4 iterations, 10 satellites, and a scaling factor of 0.5,
 meaning each satellite has half the radius of its parent and thus a quarter of the area.
 
-![Image of Fractal Circles](src/main/resources/static/images/example-fractal-circle.png)
+![Image of Fractal Circles](src/main/resources/static/examples/example-fractal-circle.png)

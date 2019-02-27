@@ -6,6 +6,14 @@ import java.awt.geom.Line2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.imageio.ImageIO;
 
@@ -14,10 +22,12 @@ import javax.imageio.ImageIO;
  * 				 that is generated on an image and can be saved to the disk.
  * @author Scott Wolfskill
  * @created     02/12/2019
- * @last_edit   02/12/2019
+ * @last_edit   02/25/2019
  */
 public abstract class Fractal2D extends Fractal 
 {
+	public AtomicBoolean cancelled;   //thread-safe boolean. If true, current generation or writing to disk will be cancelled.
+	
 	protected int width;			  //width  of fractal image to generate
 	protected int height;			  //height of fractal image to generate
 	protected int padding_horizontal; //padding (px) for left/right sides of generated image
@@ -31,6 +41,22 @@ public abstract class Fractal2D extends Fractal
 	 */
 	public abstract void generate();
 	
+	public boolean equals(Fractal2D other)
+	{
+		if(other == null) {
+			return false;
+		}
+		if(totalIterations != other.totalIterations ||
+		   width != other.width ||
+		   height != other.height ||
+		   padding_horizontal != other.padding_horizontal ||
+		   padding_vertical != other.padding_vertical) 
+		{
+			return false;
+		}
+		return true;
+	}
+	
 	protected void initialize(int width, int height, int iterations,
 							  int padding_horizontal, int padding_vertical)
 	{
@@ -41,19 +67,26 @@ public abstract class Fractal2D extends Fractal
 		this.padding_vertical = padding_vertical;
 		image = null;
 		gfx = null;
+		cancelled = new AtomicBoolean(false);
 	}
 	
 	/**
-	 * Output this generated FractalTree to a location on disk as an image.
+	 * Output this generated FractalTree to a location on disk as an image,
+	 * and output a generation message in the same directory at relativePath.
 	 * @param relativePath Directory relative to this classpath to create the file.
 	 * @param filename Name of the file to create in directory relativePath.
 	 * @param imageType Type of image to create (e.g. "png")
 	 * @return Absolute path of the image file created on disk.
-	 * @throws Exception If I/O error occurred.
+	 * @throws Exception If I/O error occurred, or if cancelled.
 	 */
-	public String outputToFile(String relativePath, String filename, String imageType) throws Exception
+	public String outputToFile(String relativePath, String imageFilename, String imageType) throws Exception
 	{
-		final String msgPrefix = "FractalTree.outputToFile: ";
+		final String msgPrefix = "Fractal2D.outputToFile: ";
+		if(cancelled != null && cancelled.get()) {
+			//System.out.println(msgPrefix + "cancelled!");
+			throw new CancellationException("Image writing to disk was cancelled.");
+		}
+		
 		ClassLoader classLoader = getClass().getClassLoader();
 		URL classpath = classLoader.getResource(".");
 		File outputDirectory = new File(classpath.getPath() + relativePath);
@@ -68,23 +101,28 @@ public abstract class Fractal2D extends Fractal
 			}
 		}
 		
-		//2. Create output file if doesn't exist already
-		File outputfile = new File(classpath.getPath() + relativePath + filename);
-		String fullpath = outputfile.getAbsolutePath();
-		if(!outputfile.exists()) {
-			System.out.println(msgPrefix + "attempt to create new file at path '" + outputfile.getAbsolutePath() + "'");
-			outputfile.createNewFile();
+		//2. Create output image file and message file if any don't exist already
+		String fullRelativePath = classpath.getPath() + relativePath;
+		File outputImageFile = new File(fullRelativePath + imageFilename);
+		String fullpath = outputImageFile.getAbsolutePath();
+		if(!outputImageFile.exists()) {
+			System.out.println(msgPrefix + "attempt to create new file at path '" + outputImageFile.getAbsolutePath() + "'");
+			outputImageFile.createNewFile();
 			System.out.println(msgPrefix + "created new file successfully.");
 		} else {
-			System.out.println(msgPrefix + "overwriting existing file at '" + outputfile.getAbsolutePath() + "'");
+			System.out.println(msgPrefix + "overwriting existing file at '" + outputImageFile.getAbsolutePath() + "'");
 		}
 		
-		//3. Write image to file
-		ImageIO.write(image, imageType, outputfile);
+		//3. Write image to file (if operation not cancelled)
+		if(cancelled != null && cancelled.get()) {
+			//System.out.println(msgPrefix + "cancelled!");
+			throw new CancellationException("Image writing to disk was cancelled.");
+		}
+		ImageIO.write(image, imageType, outputImageFile);
 		return fullpath;
 	}
 	
-	protected void generateImage()
+	protected void initImage()
 	{
 		image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 		gfx = image.createGraphics();

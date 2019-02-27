@@ -4,7 +4,7 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	<link href="css/style.css" rel="stylesheet">
 </head>
-	<form th:fragment="params" action="/fractal-tree">
+	<form id="frmParams" th:fragment="params" th:action="${action}">
 		<p>Width: <input type="text" class="input-text" name="w" th:value="${width}"> px</p>
 		<p>Height: <input type="text" class="input-text" name="h" th:value="${height}"> px</p>
 		<p>Iterations: <input type="text" class="input-text" name="i" th:value="${iterations}"></p>
