@@ -1,13 +1,35 @@
 package com.fractals;
 
+import org.springframework.lang.NonNull;
+
 /**
  * Helper --- Non-instantiable class containing general static helper methods.
  * @author Scott Wolfskill
  * @created     02/26/2019
- * @last_edit   02/26/2019
+ * @last_edit   02/27/2019
  */
 public class Helper 
 {
+	/**
+	 * Wrapper<T>: Simple class that is a wrapper for another type, which can be 
+	 * 			   used to implement pass-by-reference for immutable types such as String.
+	 * @param <T>  Class to wrap.
+	 */
+	public static class Wrapper<T>
+	{
+		public T value;
+		
+		public Wrapper() 
+		{
+			this.value = null;
+		}
+		
+		public Wrapper(T value)
+		{
+			this.value = value;
+		}
+	}
+	
 	private Helper() {}
 	
 	/**
@@ -58,5 +80,58 @@ public class Helper
 		}
 		String directories = path.substring(start, end);
 		return directories;
+	}
+	
+	public static int parseNonNegativeInt(String toParse) throws NumberFormatException
+	{
+		int value = Integer.parseInt(toParse);
+		if(value < 0) throw new NumberFormatException("Was parsed as a negative int (" + value + ").");
+		return value;
+	}
+	
+	public static int parseNonNegativeIntParam(String paramName, @NonNull String toParse, 
+			@NonNull Wrapper<String> parseFailedMessage) throws NumberFormatException
+	{
+		try 
+		{
+			int value = parseNonNegativeInt(toParse);
+			return value;
+		} 
+		catch (NumberFormatException e) 
+		{
+			parseFailedMessage.value = makeParseFailedMessage_nonNegativeInt(paramName);
+			throw e;
+		}
+	}
+
+	public static double parseDoubleParam(String paramName, @NonNull String toParse, 
+			@NonNull Wrapper<String> parseFailedMessage) throws NumberFormatException
+	{
+		try 
+		{
+			double value = Double.parseDouble(toParse);
+			return value;
+		}
+		catch (NumberFormatException e)
+		{
+			parseFailedMessage.value = makeParseFailedMessage_double(paramName);
+			throw e;
+		}
+	}
+	
+	public static String makeParseFailedMessage_nonNegativeInt(String paramName)
+	{
+		return makeParseFailedMessage(paramName, "non-negative integer");
+	}
+	
+	public static String makeParseFailedMessage_double(String paramName)
+	{
+		return makeParseFailedMessage(paramName, "real number (double precision)");
+	}
+	
+	public static String makeParseFailedMessage(String paramName, String paramType)
+	{
+		return "Failed to parse " + paramName + " parameter: please input "
+			     + paramName + " as a " + paramType + ".";
 	}
 }

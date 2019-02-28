@@ -11,6 +11,7 @@
 	<div class="column-left">
 		<h3>Parameters</h3>
 		<div th:replace="${params_page} :: ${params_fragment}"></div>
+		<p th:text="${parseFailedMessage}"></p>
 	</div>
 	
 	<div class="column-center">

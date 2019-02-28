@@ -101,7 +101,7 @@ public class FractalTree extends Fractal2D
 		if(cancelled != null && cancelled.get()) {
 			return;
 		}
-		if(iterationsRemaining == 0) {
+		if(iterationsRemaining <= 0) {
 			return;
 		}
 		if(segmentLength <= 0) {

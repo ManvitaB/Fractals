@@ -31,6 +31,11 @@ public class GenerateFractalController
 	@Autowired
 	private FractalCircleEntityRepository fractalCircleEntries;
 	
+	/*@Autowired
+	private Fractal2DEntityRepository<FractalTree> fractalTreeEntries;
+	@Autowired
+	private Fractal2DEntityRepository<FractalCircle> fractalCircleEntries;*/
+	
 	private static Fractal2DRunner fractal2DRunner = null;
 	private static Model model = null;
 	
@@ -57,17 +62,47 @@ public class GenerateFractalController
 	 */
 	@GetMapping("/fractal-tree")
 	public String generateFractalTree(
-			@RequestParam(name="w", required=false, defaultValue="500") int width,
-			@RequestParam(name="h", required=false, defaultValue="500") int height,
-			@RequestParam(name="i", required=false, defaultValue="10") int iterations,
-			@RequestParam(name="angle", required=false, defaultValue="60") double angle,
-			@RequestParam(name="factor", required=false, defaultValue="0.77") double factor,
-			@RequestParam(name="padding_w", required=false, defaultValue="40") int padding_w,
-			@RequestParam(name="padding_h", required=false, defaultValue="40") int padding_h,
+			@RequestParam(name="w", required=false, defaultValue="500") String _width,
+			@RequestParam(name="h", required=false, defaultValue="500") String _height,
+			@RequestParam(name="i", required=false, defaultValue="10") String _iterations,
+			@RequestParam(name="angle", required=false, defaultValue="60") String _angle,
+			@RequestParam(name="factor", required=false, defaultValue="0.77") String _factor,
+			@RequestParam(name="padding_w", required=false, defaultValue="40") String _padding_w,
+			@RequestParam(name="padding_h", required=false, defaultValue="40") String _padding_h,
 			@RequestParam(name="src", required=false, defaultValue=defaultFractalTreePath) String fractalImagePath,
 			Model model)
 	{
+		//Attempt to parse params to numerical types
+		Helper.Wrapper<String> parseFailedMessage = new Helper.Wrapper<String>("");
+		try 
+		{
+			int width = Helper.parseNonNegativeIntParam("Width", _width, parseFailedMessage);
+			int height = Helper.parseNonNegativeIntParam("Height", _height, parseFailedMessage);
+			int iterations = Helper.parseNonNegativeIntParam("Iterations", _iterations, parseFailedMessage);
+			double angle = Helper.parseDoubleParam("Angle", _angle, parseFailedMessage);
+			double factor = Helper.parseDoubleParam("Scaling Factor", _factor, parseFailedMessage);
+			int padding_w = Helper.parseNonNegativeIntParam("padding_w", _padding_w, parseFailedMessage);
+			int padding_h = Helper.parseNonNegativeIntParam("padding_h", _padding_h, parseFailedMessage);
+			
+			//Parse success: perform actual generation
+			return _generateFractalTree(width, height, iterations, angle, factor, padding_w, 
+										padding_h, fractalImagePath, model);
+		} 
+		catch (NumberFormatException e) 
+		{
+			//Parsing failed
+			System.out.println("generateFractalTree: " + parseFailedMessage.value);
+			model.addAllAttributes(GenerateFractalController.model.asMap());
+			model.addAttribute("parseFailedMessage", parseFailedMessage.value);
+			return "fractal";
+		}
+	}
+	
+	private String _generateFractalTree(int width, int height, int iterations, double angle, double factor, 
+										int padding_w, int padding_h, String fractalImagePath, Model model)
+	{
 		double angle_rad = Math.toRadians(angle);
+		
 		FractalTree fractalTree = new FractalTree(width, height, iterations, angle_rad,
 												  factor, padding_w, padding_h);
 		//TODO temp remove: add FractalCircleEntity to the DB
@@ -86,12 +121,14 @@ public class GenerateFractalController
 		return "fractal";
 	}
 	
+	//TODO temp for debugging
 	@GetMapping("/db-all-trees")
 	public @ResponseBody Iterable<FractalTreeEntity> listDB_fractalTrees()
 	{
 		return fractalTreeEntries.findAll();
 	}
 	
+	//TODO temp for debugging
 	@GetMapping("/db-all-circles")
 	public @ResponseBody Iterable<FractalCircleEntity> listDB_fractalCircles()
 	{
@@ -114,15 +151,44 @@ public class GenerateFractalController
 	 */
 	@GetMapping("/fractal-circle")
 	public String generateFractalCircle(
-			@RequestParam(name="w", required=false, defaultValue="700") int width,
-			@RequestParam(name="h", required=false, defaultValue="500") int height,
-			@RequestParam(name="i", required=false, defaultValue="4") int iterations,
-			@RequestParam(name="satellites", required=false, defaultValue="4") int satellites,
-			@RequestParam(name="factor", required=false, defaultValue="0.5") double factor,
-			@RequestParam(name="padding_w", required=false, defaultValue="40") int padding_w,
-			@RequestParam(name="padding_h", required=false, defaultValue="40") int padding_h,
+			@RequestParam(name="w", required=false, defaultValue="700") String _width,
+			@RequestParam(name="h", required=false, defaultValue="500") String _height,
+			@RequestParam(name="i", required=false, defaultValue="4") String _iterations,
+			@RequestParam(name="satellites", required=false, defaultValue="4") String _satellites,
+			@RequestParam(name="factor", required=false, defaultValue="0.5") String _factor,
+			@RequestParam(name="padding_w", required=false, defaultValue="40") String _padding_w,
+			@RequestParam(name="padding_h", required=false, defaultValue="40") String _padding_h,
 			@RequestParam(name="src", required=false, defaultValue=defaultFractalCirclePath) String fractalImagePath,
 			Model model)
+	{
+		// Attempt to parse params to numerical types
+		Helper.Wrapper<String> parseFailedMessage = new Helper.Wrapper<String>("");
+		try 
+		{
+			int width = Helper.parseNonNegativeIntParam("Width", _width, parseFailedMessage);
+			int height = Helper.parseNonNegativeIntParam("Height", _height, parseFailedMessage);
+			int iterations = Helper.parseNonNegativeIntParam("Iterations", _iterations, parseFailedMessage);
+			int satellites = Helper.parseNonNegativeIntParam("Satellites", _satellites, parseFailedMessage);
+			double factor = Helper.parseDoubleParam("Scaling Sactor", _factor, parseFailedMessage);
+			int padding_w = Helper.parseNonNegativeIntParam("padding_w", _padding_w, parseFailedMessage);
+			int padding_h = Helper.parseNonNegativeIntParam("padding_h", _padding_h, parseFailedMessage);
+			
+			//Parse success: perform actual generation
+			return _generateFractalCircle(width, height, iterations, satellites, factor, padding_w, 
+										  padding_h, fractalImagePath, model);
+		} 
+		catch (NumberFormatException e) 
+		{
+			// Parsing failed
+			System.out.println("generateFractalCircle: " + parseFailedMessage.value);
+			model.addAllAttributes(GenerateFractalController.model.asMap());
+			model.addAttribute("parseFailedMessage", parseFailedMessage.value);
+			return "fractal";
+		}
+	}
+	
+	private String _generateFractalCircle(int width, int height, int iterations, int satellites,
+			double factor, int padding_w, int padding_h, String fractalImagePath, Model model)
 	{
 		FractalCircle fractalCircle = new FractalCircle(width, height, iterations, satellites,
 												  	    factor, padding_w, padding_h);
@@ -217,7 +283,8 @@ public class GenerateFractalController
 		model.addAttribute("height", height);
 		model.addAttribute("iterations", iterations);
 		model.addAttribute("loadingMessage", "Generating...");
-		this.model = model;
+		model.addAttribute("parseFailedMessage", "");
+		GenerateFractalController.model = model;
 	}
 	
 	private void setFractal2DModelParam_loadingMessage(String loadingMessage, Model model)

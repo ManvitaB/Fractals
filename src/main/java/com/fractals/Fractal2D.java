@@ -25,7 +25,7 @@ import javax.persistence.MappedSuperclass;
  * 				 that is generated on an image and can be saved to the disk.
  * @author Scott Wolfskill
  * @created     02/12/2019
- * @last_edit   02/25/2019
+ * @last_edit   02/27/2019
  */
 public abstract class Fractal2D extends Fractal 
 {
@@ -45,6 +45,12 @@ public abstract class Fractal2D extends Fractal
 	 */
 	public abstract void generate();
 	
+	/**
+	 * Determine if this Fractal2D has equivalent Fractal2D-scope-only variables to other.
+	 * (to be completely equal, equals must return true too in the concrete derived class)
+	 * @param other Fractal2D to compare this Fractal2D to.
+	 * @return true if equivalent in Fractal2D-scope only, false otherwise.
+	 */
 	public boolean equals(Fractal2D other)
 	{
 		if(other == null) {
@@ -59,19 +65,6 @@ public abstract class Fractal2D extends Fractal
 			return false;
 		}
 		return true;
-	}
-	
-	protected void initialize(int width, int height, int iterations,
-							  int padding_horizontal, int padding_vertical)
-	{
-		this.width = width;
-		this.height = height;
-		this.totalIterations = iterations;
-		this.padding_horizontal = padding_horizontal;
-		this.padding_vertical = padding_vertical;
-		image = null;
-		gfx = null;
-		cancelled = new AtomicBoolean(false);
 	}
 	
 	/**
@@ -124,6 +117,21 @@ public abstract class Fractal2D extends Fractal
 		}
 		ImageIO.write(image, imageType, outputImageFile);
 		return fullpath;
+	}
+	
+	protected void initialize(int width, int height, int iterations, int padding_horizontal, int padding_vertical) 
+	{
+		this.width = width;
+		this.height = height;
+		this.totalIterations = iterations;
+		this.padding_horizontal = padding_horizontal;
+		this.padding_vertical = padding_vertical;
+		image = null;
+		gfx = null;
+		cancelled = new AtomicBoolean(false);
+		if (totalIterations <= 0) {
+			System.out.println("WARNING: Fractal2D initialized with non-positive iterations (" + totalIterations + ")!");
+		}
 	}
 	
 	protected void initImage()

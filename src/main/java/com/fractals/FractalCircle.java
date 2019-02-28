@@ -83,7 +83,7 @@ public class FractalCircle extends Fractal2D
 		if(cancelled != null && cancelled.get()) {
 			return;
 		}
-		if(iterationsRemaining == 0) {
+		if(iterationsRemaining <= 0) {
 			return;
 		}
 		if(radius <= 0) {
