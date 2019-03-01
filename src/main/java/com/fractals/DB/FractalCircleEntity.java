@@ -12,30 +12,41 @@ import com.fractals.FractalCircle;
  * FractalCircleEntity --- A JPA Entity that holds Fractal2D database information for a FractalCircle. 
  * @author Scott Wolfskill
  * @created     02/27/2019
- * @last_edit   02/27/2019
+ * @last_edit   02/28/2019
  */
 @Entity
-public class FractalCircleEntity extends Fractal2DEntity
-{
-	@Embedded
-	private FractalCircle fractalCircle;
-	
+public class FractalCircleEntity extends Fractal2DEntity<FractalCircle>
+{	
 	public FractalCircleEntity() {} //Entity must define default CTOR
 	
-	public FractalCircleEntity(FractalCircle fractalCircle, String imageSrc, String loadingMessage, 
-							 Date expirationDate, Boolean generationComplete) 
+	public FractalCircleEntity(FractalCircle fractalCircle) 
 	{
-		super(imageSrc, loadingMessage, expirationDate, generationComplete);
-		setFractalCircle(fractalCircle);
+		super(fractalCircle);
 	}
 	
-	public Fractal2D getFractalCircle() 
+	@Override
+	public FractalCircle getFractal2D()
 	{
-		return fractalCircle;
+		return fractal2D;
 	}
 	
-	public void setFractalCircle(FractalCircle fractalCircle)
+	@Override
+	public void setFractal2D(FractalCircle fractal2D)
 	{
-		this.fractalCircle = fractalCircle;
+		try {
+			this.fractal2D = (FractalCircle) fractal2D;
+		} catch (Exception e) {
+			System.out.println("FractalCircleEntity.setFractal2D: " + e.getClass().getName() + "'" + e.getMessage() + "'.");
+			throw e;
+		}
 	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public FractalCircleEntityRepository getRepository()
+	{
+		return DB.getFractalCircleEntities();
+	}
+	
+	
 }

@@ -6,7 +6,7 @@ import org.springframework.lang.NonNull;
  * Helper --- Non-instantiable class containing general static helper methods.
  * @author Scott Wolfskill
  * @created     02/26/2019
- * @last_edit   02/27/2019
+ * @last_edit   02/28/2019
  */
 public class Helper 
 {
@@ -103,6 +103,21 @@ public class Helper
 			throw e;
 		}
 	}
+	
+	public static long parseLongParam(String paramName, @NonNull String toParse, 
+			@NonNull Wrapper<String> parseFailedMessage) throws NumberFormatException
+	{
+		try 
+		{
+			long value = Long.parseLong(toParse);
+			return value;
+		}
+		catch (NumberFormatException e)
+		{
+			parseFailedMessage.value = makeParseFailedMessage_long(paramName);
+			throw e;
+		}
+	}
 
 	public static double parseDoubleParam(String paramName, @NonNull String toParse, 
 			@NonNull Wrapper<String> parseFailedMessage) throws NumberFormatException
@@ -122,6 +137,11 @@ public class Helper
 	public static String makeParseFailedMessage_nonNegativeInt(String paramName)
 	{
 		return makeParseFailedMessage(paramName, "non-negative integer");
+	}
+	
+	public static String makeParseFailedMessage_long(String paramName)
+	{
+		return makeParseFailedMessage(paramName, "integer (long supported)");
 	}
 	
 	public static String makeParseFailedMessage_double(String paramName)

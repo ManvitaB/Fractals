@@ -25,8 +25,9 @@ import javax.persistence.MappedSuperclass;
  * 				 that is generated on an image and can be saved to the disk.
  * @author Scott Wolfskill
  * @created     02/12/2019
- * @last_edit   02/27/2019
+ * @last_edit   02/28/2019
  */
+@MappedSuperclass
 public abstract class Fractal2D extends Fractal 
 {
 	//transient keyword denotes won't be serialized or stored in DB

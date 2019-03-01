@@ -2,7 +2,6 @@ package com.fractals.DB;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Controller;
 
 /**
  * DB --- Bean for managing Fractal2DEntity repositories and interacting with the database.

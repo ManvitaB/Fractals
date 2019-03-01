@@ -10,7 +10,7 @@ import org.junit.Test;
  * HelperTest --- Contains tests for Helper class static methods.
  * @author Scott Wolfskill
  * @created     02/26/2019
- * @last_edit   02/27/2019
+ * @last_edit   02/28/2019
  */
 public class HelperTest 
 {
@@ -90,17 +90,18 @@ public class HelperTest
 	
 	@Test
 	public void parseNonNegativeIntParamTest()
-	{
+	{	
 		// 1. Throws exception for invalid type (not an int):
+		final String paramName = "p";
 		boolean exceptionThrown = false;
 		Helper.Wrapper<String> parseFailedMsg = new Helper.Wrapper<String>("");
 		try {
-			Helper.parseNonNegativeIntParam("p", "not an int", parseFailedMsg);
+			Helper.parseNonNegativeIntParam(paramName, "not an int", parseFailedMsg);
 		} catch (NumberFormatException e) {
 			exceptionThrown = true;
 		}
 		assertTrue(exceptionThrown);
-		assertEquals(Helper.makeParseFailedMessage_nonNegativeInt("p"), parseFailedMsg.value);
+		assertEquals(Helper.makeParseFailedMessage_nonNegativeInt(paramName), parseFailedMsg.value);
 
 		// 2. Throws exception for invalid input bounds (int, but negative):
 		exceptionThrown = false;
@@ -111,14 +112,14 @@ public class HelperTest
 			exceptionThrown = true;
 		}
 		assertTrue(exceptionThrown);
-		assertEquals(Helper.makeParseFailedMessage_nonNegativeInt("p"), parseFailedMsg.value);
+		assertEquals(Helper.makeParseFailedMessage_nonNegativeInt(paramName), parseFailedMsg.value);
 
 		// 3. Does not throw exception for valid input (non-negative int):
 		exceptionThrown = false;
 		parseFailedMsg.value = "";
 		int parsed = -1;
 		try {
-			parsed = Helper.parseNonNegativeIntParam("p", "274", parseFailedMsg);
+			parsed = Helper.parseNonNegativeIntParam(paramName, "274", parseFailedMsg);
 		} catch (NumberFormatException e) {
 			exceptionThrown = true;
 		}
@@ -128,9 +129,38 @@ public class HelperTest
 	}
 	
 	@Test
+	public void parseLongParamTest()
+	{
+		// 1. Throws exception for invalid type (not a long):
+		final String paramName = "p";
+		boolean exceptionThrown = false;
+		Helper.Wrapper<String> parseFailedMsg = new Helper.Wrapper<String>("");
+		try {
+			Helper.parseLongParam("p", "not a long", parseFailedMsg);
+		} catch (NumberFormatException e) {
+			exceptionThrown = true;
+		}
+		assertTrue(exceptionThrown);
+		assertEquals(Helper.makeParseFailedMessage_long(paramName), parseFailedMsg.value);
+
+		// 2. Does not throw exception for valid input (long):
+		exceptionThrown = false;
+		parseFailedMsg.value = "";
+		double parsed = -1;
+		try {
+			parsed = Helper.parseLongParam(paramName, "-274", parseFailedMsg);
+		} catch (NumberFormatException e) {
+			exceptionThrown = true;
+		}
+		assertFalse(exceptionThrown);
+		assertEquals(-274L, parsed, 0.0); 	// assert exact match
+		assertEquals("", parseFailedMsg.value); // assert that parseFailedMsg is unchanged
+	}
+	
+	@Test
 	public void parseDoubleParamTest()
 	{
-		// 1. Throws exception for invalid type (not an int):
+		// 1. Throws exception for invalid type (not a double):
 		boolean exceptionThrown = false;
 		Helper.Wrapper<String> parseFailedMsg = new Helper.Wrapper<String>("");
 		try {

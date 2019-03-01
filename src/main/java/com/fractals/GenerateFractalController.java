@@ -1,6 +1,7 @@
 package com.fractals;
 
 import java.util.Date;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -29,28 +30,20 @@ import com.fractals.DB.FractalTreeEntity;
 @Controller
 public class GenerateFractalController 
 {	
-	private static Fractal2DRunner fractal2DRunner = null;
-	private static Model model = null;
-	
-	private final String staticDir = "static/";
-	private final String defaultFractalImageDirectory = "images/";
-	private final String defaultFractalTreeFilename = "fractal-tree.png";
-	private final String defaultFractalTreePath = defaultFractalImageDirectory + defaultFractalTreeFilename;
-	private final String defaultFractalCircleFilename = "fractal-circle.png";
-	private final String defaultFractalCirclePath = defaultFractalImageDirectory + defaultFractalCircleFilename;
+	private final String pageTitle_FractalTree = "Fractal Tree";
+	private final String pageTitle_FractalCircle = "Fractal Circles";
 	
 	/**
 	 * Queue a FractalTree for async generation, and return fractal.html
 	 * with params fragment set to fragments/fractal-tree-params.html
-	 * @param width Width of the image to generate.
-	 * @param height Height of the image to generate.
-	 * @param iterations Number of fractal iterations to perform.
-	 * @param angle Angle in degrees between child nodes in the fractal.
-	 * @param factor Scaling factor for each child node in the fractal.
-	 * @param padding_w Horizontal padding in the image to generate.
-	 * @param padding_h Vertical padding in the image to generate.
-	 * @param fractalImagePath Relative path (inside "static/" directory) to generate fractal image at.
-	 * @param model Thymeleaf page model
+	 * @param _width Width of the image to generate.
+	 * @param _height Height of the image to generate.
+	 * @param _iterations Number of fractal iterations to perform.
+	 * @param _angle Angle in degrees between child nodes in the fractal.
+	 * @param _factor Scaling factor for each child node in the fractal.
+	 * @param _padding_w Horizontal padding in the image to generate.
+	 * @param _padding_h Vertical padding in the image to generate.
+	 * @param _model Thymeleaf page model
 	 * @return fractal.html
 	 */
 	@GetMapping("/fractal-tree")
@@ -62,7 +55,6 @@ public class GenerateFractalController
 			@RequestParam(name="factor", required=false, defaultValue="0.77") String _factor,
 			@RequestParam(name="padding_w", required=false, defaultValue="40") String _padding_w,
 			@RequestParam(name="padding_h", required=false, defaultValue="40") String _padding_h,
-			@RequestParam(name="src", required=false, defaultValue=defaultFractalTreePath) String fractalImagePath,
 			Model model)
 	{
 		//Attempt to parse params to numerical types
@@ -79,39 +71,42 @@ public class GenerateFractalController
 			
 			//Parse success: perform actual generation
 			return _generateFractalTree(width, height, iterations, angle, factor, padding_w, 
-										padding_h, fractalImagePath, model);
+										padding_h, model);
 		} 
 		catch (NumberFormatException e) 
 		{
 			//Parsing failed
 			System.out.println("generateFractalTree: " + parseFailedMessage.value);
-			model.addAllAttributes(GenerateFractalController.model.asMap());
-			model.addAttribute("parseFailedMessage", parseFailedMessage.value);
+			//TODO create parse failed image
+			setFractalTreeModelParams("images/TODOparsefailedimage.png", parseFailedMessage.value, _width, _height, 
+									  _iterations, _angle, _factor, model);
 			return "fractal";
 		}
 	}
 	
 	private String _generateFractalTree(int width, int height, int iterations, double angle, double factor, 
-										int padding_w, int padding_h, String fractalImagePath, Model model)
+										int padding_w, int padding_h, Model model)
 	{
 		double angle_rad = Math.toRadians(angle);
 		
 		FractalTree fractalTree = new FractalTree(width, height, iterations, angle_rad,
 												  factor, padding_w, padding_h);
-		//TODO temp remove: add FractalCircleEntity to the DB
-		FractalTreeEntity fractalTreeEntity = new FractalTreeEntity(fractalTree, fractalImagePath, "Generating...", 
-				new java.sql.Date(new Date().getTime()), new Boolean(false));
-		//fractalTreeEntries.save(fractalTreeEntity);
-		DB.getFractalTreeEntities().save(fractalTreeEntity);
-		//end temp
-		// Set FractalTree-specific attributes
-		model.addAttribute("angle", angle);
-		model.addAttribute("factor", factor);
+		
+		//WARNING: since we create a new Fractal2DEntity for each request and don't recycle IDs, the IDs could skyrocket quickly.
+		FractalTreeEntity newEntity = new FractalTreeEntity(fractalTree);
 		
 		// Generate on separate thread using Fractal2DRunner, if not duplicate request
-		generateFractal2D(fractalTree, fractalImagePath, "Fractal Tree", "/fractal-tree", 
-				  "fragments/fractal-tree-params.html", model);
-		
+		FractalTreeEntity dbEntity = Fractal2DRunner_new.generate(newEntity);
+		FractalTreeEntity toUse = newEntity;
+		if(dbEntity == null) //not in DB yet
+		{
+			toUse = newEntity;
+		} else { //already present in DB; in-progress or already generated
+			toUse = dbEntity;
+			System.out.println("generateFractal2D: existing " + dbEntity.getClass().getSimpleName() + " found in database.");
+		}
+		setFractalTreeModelParams(toUse.getImageSrc(), toUse.getLoadingMessage(), String.valueOf(width), 
+								  String.valueOf(height), String.valueOf(iterations), String.valueOf(angle), String.valueOf(factor), model);
 		return "fractal";
 	}
 	
@@ -119,7 +114,6 @@ public class GenerateFractalController
 	@GetMapping("/db-all-trees")
 	public @ResponseBody Iterable<FractalTreeEntity> listDB_fractalTrees()
 	{
-		//return fractalTreeEntries.findAll();
 		return DB.getFractalTreeEntities().findAll();
 	}
 	
@@ -127,27 +121,19 @@ public class GenerateFractalController
 	@GetMapping("/db-all-circles")
 	public @ResponseBody Iterable<FractalCircleEntity> listDB_fractalCircles()
 	{
-		//return fractalCircleEntries.findAll();
 		return DB.getFractalCircleEntities().findAll();
-		/*ApplicationContext context = new AnnotationConfigApplicationContext(BeanConfig.class);
-		DB db = context.getBean("db", DB.class);
-		System.out.println(db.fractalTreeEntities);
-		System.out.println(db.fractalCircleEntities);
-		return db.fractalCircleEntities.findAll();*/
-		//throws long exception about can't find FractalTreeEntityRepository bean
 	}
 	
 	/**
 	 * Queue a FractalCircle for async generation, and return fractal.html
 	 * with params fragment set to fragments/fractal-circle-params.html
-	 * @param width Width of the image to generate.
-	 * @param height Height of the image to generate.
-	 * @param iterations Number of fractal iterations to perform.
-	 * @param satellites Number of child node 'satellites' to generate per iteration.
-	 * @param factor Scaling factor for each child node in the fractal.
-	 * @param padding_w Horizontal padding in the image to generate.
-	 * @param padding_h Vertical padding in the image to generate.
-	 * @param fractalImagePath Relative path (inside "static/" directory) to generate fractal image at.
+	 * @param _width Width of the image to generate.
+	 * @param _height Height of the image to generate.
+	 * @param _iterations Number of fractal iterations to perform.
+	 * @param _satellites Number of child node 'satellites' to generate per iteration.
+	 * @param _factor Scaling factor for each child node in the fractal.
+	 * @param _padding_w Horizontal padding in the image to generate.
+	 * @param _padding_h Vertical padding in the image to generate.
 	 * @param model Thymeleaf page model
 	 * @return fractal.html
 	 */
@@ -160,7 +146,6 @@ public class GenerateFractalController
 			@RequestParam(name="factor", required=false, defaultValue="0.5") String _factor,
 			@RequestParam(name="padding_w", required=false, defaultValue="40") String _padding_w,
 			@RequestParam(name="padding_h", required=false, defaultValue="40") String _padding_h,
-			@RequestParam(name="src", required=false, defaultValue=defaultFractalCirclePath) String fractalImagePath,
 			Model model)
 	{
 		// Attempt to parse params to numerical types
@@ -177,105 +162,107 @@ public class GenerateFractalController
 			
 			//Parse success: perform actual generation
 			return _generateFractalCircle(width, height, iterations, satellites, factor, padding_w, 
-										  padding_h, fractalImagePath, model);
+										  padding_h, model);
 		} 
 		catch (NumberFormatException e) 
 		{
 			// Parsing failed
 			System.out.println("generateFractalCircle: " + parseFailedMessage.value);
-			model.addAllAttributes(GenerateFractalController.model.asMap());
-			model.addAttribute("parseFailedMessage", parseFailedMessage.value);
+			//TODO create parse failed image
+			setFractalCircleModelParams("TODOparseerrorimage.png", parseFailedMessage.value, _width, _height, 
+										_iterations, _satellites, _factor, model);
 			return "fractal";
 		}
 	}
 	
 	private String _generateFractalCircle(int width, int height, int iterations, int satellites,
-			double factor, int padding_w, int padding_h, String fractalImagePath, Model model)
+			double factor, int padding_w, int padding_h, Model model)
 	{
-		FractalCircle fractalCircle = new FractalCircle(width, height, iterations, satellites,
-												  	    factor, padding_w, padding_h);
-		// TODO temp remove: add FractalTreeEntity to the DB
-		FractalCircleEntity fractalCircleEntity = new FractalCircleEntity(fractalCircle, fractalImagePath, "Generating...",
-				new java.sql.Date(new Date().getTime()), new Boolean(false));
-		//fractalCircleEntries.save(fractalCircleEntity);
-		DB.getFractalCircleEntities().save(fractalCircleEntity);
-		// end temp
+		FractalCircle fractalCircle = new FractalCircle(width, height, iterations, satellites, factor, padding_w, padding_h);
+
+		//WARNING: since we create a new Fractal2DEntity for each request and don't recycle IDs, the IDs could skyrocket quickly.
+		FractalCircleEntity newEntity = new FractalCircleEntity(fractalCircle);
+
+		// Generate on separate thread using Fractal2DRunner, if not duplicate request
+		FractalCircleEntity dbEntity = Fractal2DRunner_new.generate(newEntity);
+		FractalCircleEntity toUse = newEntity;
+		if (dbEntity == null) // not in DB yet
+		{
+			toUse = newEntity;
+		} else { // already present in DB; in-progress or already generated
+			toUse = dbEntity;
+			System.out.println("generateFractal2D: existing " + dbEntity.getClass().getSimpleName() + " found in database.");
+		}
+		setFractalCircleModelParams(toUse.getImageSrc(), toUse.getLoadingMessage(), String.valueOf(width), 
+									String.valueOf(height), String.valueOf(iterations), String.valueOf(satellites), String.valueOf(factor), model);
+		return "fractal";
+	}
+
+	/**
+	 * Gets a Fractal2DEntity from the DB by ID, and returns its fractal2D.loadingMessage.
+	 * @param _id ID of the Fractal2DEntity to find in the DB.
+	 * @param pageTitle fractal.html page title (set depending on the type of fractal shown).
+	 * @return ResponseEntity containing the loadingMessage.
+	 */
+	@GetMapping("/get-loading-message")
+	public @ResponseBody ResponseEntity<?> getLoadingMessage(
+			@RequestParam(name="id", required=true) String _id,
+			@RequestParam(name="pageTitle", required=true) String pageTitle)
+	{
+		Helper.Wrapper<String> parseFailedMessage = new Helper.Wrapper<>("");
+		try {
+			long id = Helper.parseLongParam("id", _id, parseFailedMessage);
+			return _getLoadingMessage(id, pageTitle);
+		} catch (NumberFormatException e) {
+			return ResponseEntity.badRequest().body(parseFailedMessage.value);
+		}
+	}
+	
+	private ResponseEntity<?> _getLoadingMessage(long id, String pageTitle)
+	{
+		switch (pageTitle) {
+			case pageTitle_FractalTree:
+				Optional<FractalTreeEntity> dbEntity = DB.getFractalTreeEntities().findById(id);
+				if(dbEntity.isPresent()) {
+					return ResponseEntity.ok(dbEntity.get().getLoadingMessage());
+				}
+				break;
+			case pageTitle_FractalCircle:
+				Optional<FractalCircleEntity> dbEntity2 = DB.getFractalCircleEntities().findById(id);
+				if(dbEntity2.isPresent()) {
+					return ResponseEntity.ok(dbEntity2.get().getLoadingMessage());
+				}
+				break;
+			default:
+				return ResponseEntity.badRequest().body("Invalid param pageTitle set; use fractal.html's title as the parameter.");
+		}
+		return ResponseEntity.badRequest().body("Not found: no Fractal2DEntity with ID#" + id + " found in the database.");
+	}
+	
+	private void setFractalTreeModelParams(String imageSrc, String loadingMessage, String width, 
+										   String height, String iterations, String angle, String factor, Model model)
+	{
+		setFractal2DModelParams("Fractal Tree", "/fractal-tree", imageSrc,
+				"fragments/fractal-tree-params.html", loadingMessage, 
+				width, height, iterations, model);
+		// Set FractalTree-specific attributes
+		model.addAttribute("angle", angle);
+		model.addAttribute("factor", factor);
+	}
+	
+	private void setFractalCircleModelParams(String imageSrc, String loadingMessage, String width, 
+											 String height, String iterations, String satellites, String factor, Model model)
+	{
+		setFractal2DModelParams("Fractal Circles", "/fractal-circle", imageSrc,
+				"fragments/fractal-circle-params.html", loadingMessage, 
+				width, height, iterations, model);
 		// Set FractalCircle-specific attributes
 		model.addAttribute("satellites", satellites);
 		model.addAttribute("factor", factor);
-					
-		// Generate on separate thread using Fractal2DRunner, if not duplicate request
-		generateFractal2D(fractalCircle, fractalImagePath, "Fractal Circles", "/fractal-circle", 
-						  "fragments/fractal-circle-params.html", model);
-		
-		return "fractal";
-	}
-	
-	/**
-	 * Return the String value of the page model's loadingMessage attribute.
-	 * @return ResponseEntity containing a single String
-	 */
-	@GetMapping("/get-loading-message")
-	public @ResponseBody ResponseEntity<?> getLoadingMessage()
-	{
-		if(model != null) {
-			String loadingMessage = (String) model.asMap().get("loadingMessage");
-			return ResponseEntity.ok(loadingMessage);
-		} else {
-			String errMessage = "No loading message found; no fractal generation has been attempted.";
-			return ResponseEntity.badRequest().body(errMessage);
-		}
-	}
-	
-	/**
-	 * Queue a Fractal2D for asynchronous generation using fractal2DRunner (unless duplicate request)
-	 * and set a Thymeleaf page model attributes.
-	 * @param toGenerate Fractal2D to generate & output to file asynchronously.
-	 * @param fractalImagePath Relative path of the output image to generate. (e.g. "images/fractal2d.png")
-	 * @param title Title of the Thymeleaf page to set.
-	 * @param action Action URI of the Fractal2D to generate.
-	 * @param params_page Thymeleaf fragment to load which holds form parameters for the fractal2D.
-	 * @param model Thymeleaf page model to set the attributes of.
-	 * @return true if queued for generation, false if duplicate request.
-	 */
-	private boolean generateFractal2D(Fractal2D toGenerate, String fractalImagePath, String title, 
-									  String action, String params_page, Model model)
-	{
-		String relativePath = staticDir + Helper.getDirectoriesFromPath(fractalImagePath);
-		String filename = Helper.getFilenameFromPath(fractalImagePath);
-		String relativePath_full = relativePath + filename;
-		Fractal2DRunner.ModelParamSetter modelParamSetter = initFractal2DRunner(model);
-		
-		//Generate on separate thread using Fractal2DRunner, if not duplicate request
-		if(fractal2DRunner.isDuplicate(toGenerate, relativePath_full)) {
-			System.out.println("generateFractal2D: duplicate " + toGenerate.getClass().getSimpleName() + " request.");
-			model.addAllAttributes(GenerateFractalController.model.asMap());
-			model.addAttribute("imagePath", fractalImagePath);
-			return false;
-		} else {
-			setFractal2DModelParams(title, action, fractalImagePath, params_page, toGenerate.width, 
-								    toGenerate.height, toGenerate.totalIterations, model);
-
-			fractal2DRunner.generateAndOutputToFile(modelParamSetter, toGenerate, relativePath, filename, true, false);
-			return true;
-		}
-	}
-	
-	private Fractal2DRunner.ModelParamSetter initFractal2DRunner(Model model)
-	{
-		if(fractal2DRunner == null) {
-			fractal2DRunner = new Fractal2DRunner();
-		}
-		
-		Fractal2DRunner.ModelParamSetter modelParamSetter = (String loadingMessage) ->
-		{
-			setFractal2DModelParam_loadingMessage(loadingMessage, model);
-		};
-		return modelParamSetter;
 	}
 	
 	private void setFractal2DModelParams(String title, String action, String imagePath, String params_page, 
-			   							 int width, int height, int iterations, Model model)
+			   							 String loadingMessage, String width, String height, String iterations, Model model)
 	{
 		model.addAttribute("title", title);
 		model.addAttribute("action", action);
@@ -285,15 +272,8 @@ public class GenerateFractalController
 		model.addAttribute("width", width);
 		model.addAttribute("height", height);
 		model.addAttribute("iterations", iterations);
-		model.addAttribute("loadingMessage", "Generating...");
+		model.addAttribute("loadingMessage", loadingMessage);
 		model.addAttribute("parseFailedMessage", "");
-		GenerateFractalController.model = model;
 	}
 	
-	private void setFractal2DModelParam_loadingMessage(String loadingMessage, Model model)
-	{
-		// This updates server-side model only. The client must get the updated attribute with 
-		// URI /get-loading-message
-		model.addAttribute("loadingMessage", loadingMessage);
-	}
 }

@@ -56,8 +56,8 @@ function setImageSrc_noCache() {
 }
 
 /**
- * Asynchronously gets the value of the page model's attribute loadingMessage w/ AJAX,
- * and sets doc element loadingMessage's text with its value.
+ * Asynchronously gets the loading message of the fractal being generated w/ AJAX,
+ * and sets doc element loadingMessage's text with that value.
  */
 function getLoadingMessage() {
 	var xhttp = new XMLHttpRequest();
@@ -68,7 +68,9 @@ function getLoadingMessage() {
 			loadingMessageElement.innerHTML = this.responseText;
 		}
 	}
-	xhttp.open("GET", "/get-loading-message", true);
+	var id = getIdFromImageSrc(fractalImage_src);
+	var pageTitle = document.getElementById("pageTitle").innerHTML;
+	xhttp.open("GET", "/get-loading-message?id=" + id + "&pageTitle=" + pageTitle, true);
 	xhttp.send();
 }
 
@@ -91,6 +93,27 @@ function stripQueryString(input) {
 		}
 	}
 	return input.substring(start, end);
+}
+
+/**
+ * Gets the ID portion of a String in format [something]_[id].[file type]
+ * @param imageSrc String to get the ID from.
+ * @returns String containing ID parsed.
+ */
+function getIdFromImageSrc(imageSrc) {
+	var chars = imageSrc.split("");
+	var start = 0;
+	var end = chars.length;
+	for(var i = end - 1; i >= 0; i--) {
+		if(chars[i] == '.') {
+			end = i;
+		}
+		if(chars[i] == '_') {
+			start = i + 1;
+			break;
+		}
+	}
+	return imageSrc.substring(start, end);
 }
 
 /**

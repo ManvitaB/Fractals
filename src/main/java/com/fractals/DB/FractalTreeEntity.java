@@ -12,30 +12,38 @@ import com.fractals.FractalTree;
  * FractalTreeEntity --- A JPA Entity that holds Fractal2D database information for a FractalTree. 
  * @author Scott Wolfskill
  * @created     02/27/2019
- * @last_edit   02/27/2019
+ * @last_edit   02/28/2019
  */
 @Entity
-public class FractalTreeEntity extends Fractal2DEntity
-{
-	@Embedded
-	private FractalTree fractalTree;
-	
+public class FractalTreeEntity extends Fractal2DEntity<FractalTree>
+{	
 	public FractalTreeEntity() {} //Entity must define default CTOR
 	
-	public FractalTreeEntity(FractalTree fractalTree, String imageSrc, String loadingMessage, 
-							 Date expirationDate, Boolean generationComplete) 
+	public FractalTreeEntity(FractalTree fractalTree) 
 	{
-		super(imageSrc, loadingMessage, expirationDate, generationComplete);
-		setFractalTree(fractalTree);
+		super(fractalTree);
+		setFractal2D(fractalTree);
 	}
 	
-	public Fractal2D getFractalTree() 
+	public FractalTree getFractal2D() 
 	{
-		return fractalTree;
+		return fractal2D;
 	}
 	
-	public void setFractalTree(FractalTree fractalTree)
+	public void setFractal2D(FractalTree fractal2D)
 	{
-		this.fractalTree = fractalTree;
+		try {
+			this.fractal2D = (FractalTree) fractal2D;
+		} catch (Exception e) {
+			System.out.println("FractalTreeEntity.setFractal2D: " + e.getClass().getName() + "'" + e.getMessage() + "'.");
+			throw e;
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public FractalTreeEntityRepository getRepository()
+	{
+		return DB.getFractalTreeEntities();
 	}
 }

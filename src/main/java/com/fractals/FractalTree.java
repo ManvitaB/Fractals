@@ -65,7 +65,7 @@ public class FractalTree extends Fractal2D
 				return false;
 			}
 		} catch (Exception e) {
-			System.out.println("FractalTree.equals: Exception '" + e.getMessage() + "'.");
+			System.out.println("FractalTree.equals: " + e.getClass().getName() + " '" + e.getMessage() + "'.");
 			return false;
 		}
 		return true;
