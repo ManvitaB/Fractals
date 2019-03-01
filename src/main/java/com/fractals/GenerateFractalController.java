@@ -3,6 +3,8 @@ package com.fractals;
 import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -10,10 +12,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.fractals.DB.DB;
+import com.fractals.DB.Fractal2DEntity;
+import com.fractals.DB.Fractal2DEntityRepository;
 import com.fractals.DB.FractalCircleEntity;
-import com.fractals.DB.FractalCircleEntityRepository;
 import com.fractals.DB.FractalTreeEntity;
-import com.fractals.DB.FractalTreeEntityRepository;
 
 /**
  * GenerateFractalController --- 
@@ -21,21 +24,11 @@ import com.fractals.DB.FractalTreeEntityRepository;
  * 		    and then display the fractal HTML page.
  * @author Scott Wolfskill
  * @created     02/12/2019
- * @last_edit   02/27/2019
+ * @last_edit   02/28/2019
  */
 @Controller
 public class GenerateFractalController 
-{
-	@Autowired
-	private FractalTreeEntityRepository fractalTreeEntries;
-	@Autowired
-	private FractalCircleEntityRepository fractalCircleEntries;
-	
-	/*@Autowired
-	private Fractal2DEntityRepository<FractalTree> fractalTreeEntries;
-	@Autowired
-	private Fractal2DEntityRepository<FractalCircle> fractalCircleEntries;*/
-	
+{	
 	private static Fractal2DRunner fractal2DRunner = null;
 	private static Model model = null;
 	
@@ -108,7 +101,8 @@ public class GenerateFractalController
 		//TODO temp remove: add FractalCircleEntity to the DB
 		FractalTreeEntity fractalTreeEntity = new FractalTreeEntity(fractalTree, fractalImagePath, "Generating...", 
 				new java.sql.Date(new Date().getTime()), new Boolean(false));
-		fractalTreeEntries.save(fractalTreeEntity);
+		//fractalTreeEntries.save(fractalTreeEntity);
+		DB.getFractalTreeEntities().save(fractalTreeEntity);
 		//end temp
 		// Set FractalTree-specific attributes
 		model.addAttribute("angle", angle);
@@ -125,14 +119,22 @@ public class GenerateFractalController
 	@GetMapping("/db-all-trees")
 	public @ResponseBody Iterable<FractalTreeEntity> listDB_fractalTrees()
 	{
-		return fractalTreeEntries.findAll();
+		//return fractalTreeEntries.findAll();
+		return DB.getFractalTreeEntities().findAll();
 	}
 	
 	//TODO temp for debugging
 	@GetMapping("/db-all-circles")
 	public @ResponseBody Iterable<FractalCircleEntity> listDB_fractalCircles()
 	{
-		return fractalCircleEntries.findAll();
+		//return fractalCircleEntries.findAll();
+		return DB.getFractalCircleEntities().findAll();
+		/*ApplicationContext context = new AnnotationConfigApplicationContext(BeanConfig.class);
+		DB db = context.getBean("db", DB.class);
+		System.out.println(db.fractalTreeEntities);
+		System.out.println(db.fractalCircleEntities);
+		return db.fractalCircleEntities.findAll();*/
+		//throws long exception about can't find FractalTreeEntityRepository bean
 	}
 	
 	/**
@@ -195,7 +197,8 @@ public class GenerateFractalController
 		// TODO temp remove: add FractalTreeEntity to the DB
 		FractalCircleEntity fractalCircleEntity = new FractalCircleEntity(fractalCircle, fractalImagePath, "Generating...",
 				new java.sql.Date(new Date().getTime()), new Boolean(false));
-		fractalCircleEntries.save(fractalCircleEntity);
+		//fractalCircleEntries.save(fractalCircleEntity);
+		DB.getFractalCircleEntities().save(fractalCircleEntity);
 		// end temp
 		// Set FractalCircle-specific attributes
 		model.addAttribute("satellites", satellites);

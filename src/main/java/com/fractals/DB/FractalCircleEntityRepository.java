@@ -2,9 +2,21 @@ package com.fractals.DB;
 
 import org.springframework.data.repository.CrudRepository;
 
-//This will be AUTO IMPLEMENTED by Spring into a Bean called fractal2DEntryRepository
-//CRUD refers Create, Read, Update, Delete
-public interface FractalCircleEntityRepository extends CrudRepository<FractalCircleEntity, Integer>
+/**
+ * FractalCircleEntityRepository --- Interface extending Fractal2DEntityRepository for FractalCircleEntity
+ * 								     that will be implemented automatically by Spring
+ * 								     into a Bean called fractalTreeEntityRepository.
+ * @author Scott Wolfskill
+ * @created     02/28/2019
+ * @last_edit   02/28/2019
+ */
+public interface FractalCircleEntityRepository extends Fractal2DEntityRepository<FractalCircleEntity>
 {
-	
+	/* Since parent interface Fractal2DEntityRepository has annotation '@NoRepositoryBean',
+	 * to have Spring generate this repository automatically we needed to create this
+	 * interface explicitly.
+	 * 
+	 * (as opposed to simply creating an autowired variable
+	 * Fractal2DEntityRepository<FractalCircleEntity> fractalCircleEntities)
+	 */ 
 }

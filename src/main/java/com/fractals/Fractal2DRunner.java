@@ -3,8 +3,13 @@ package com.fractals;
 import java.util.Date;
 import java.util.concurrent.CompletableFuture;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+
+import com.fractals.DB.Fractal2DEntityRepository;
+import com.fractals.DB.FractalCircleEntity;
+import com.fractals.DB.FractalTreeEntity;
 
 /**
  * Fractal2DRunner --- Generates and outputs a Fractal2D as an image to the disk 
@@ -15,7 +20,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class Fractal2DRunner 
-{
+{	
 	private Fractal2D fractal2D;
 	private String outputImagePath;
 	private CompletableFuture<String> runner;
@@ -66,6 +71,9 @@ public class Fractal2DRunner
 		}
 		this.fractal2D = fractal2D;
 		this.outputImagePath = relativePath_full;
+		//TODO TEMP save to DB:
+		//saveToDB(fractal2D);
+		//end TEMP
 		runner = CompletableFuture.supplyAsync(() -> {
 			final String fractalType = fractal2D.getClass().getSimpleName();
 			System.out.println(fractalType + " runner started.");
