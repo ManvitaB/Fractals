@@ -25,7 +25,7 @@ import com.fractals.DB.FractalTreeEntity;
  * 		    and then display the fractal HTML page.
  * @author Scott Wolfskill
  * @created     02/12/2019
- * @last_edit   02/28/2019
+ * @last_edit   03/02/2019
  */
 @Controller
 public class GenerateFractalController 
@@ -95,8 +95,8 @@ public class GenerateFractalController
 		//WARNING: since we create a new Fractal2DEntity for each request and don't recycle IDs, the IDs could skyrocket quickly.
 		FractalTreeEntity newEntity = new FractalTreeEntity(fractalTree);
 		
-		// Generate on separate thread using Fractal2DRunner, if not duplicate request
-		FractalTreeEntity dbEntity = Fractal2DRunner_new.generate(newEntity);
+		// Generate on separate thread using Fractal2DRunner, if match not found in DB
+		FractalTreeEntity dbEntity = Fractal2DRunner_new.generate(newEntity, false);
 		FractalTreeEntity toUse = newEntity;
 		if(dbEntity == null) //not in DB yet
 		{
@@ -142,7 +142,7 @@ public class GenerateFractalController
 			@RequestParam(name="w", required=false, defaultValue="700") String _width,
 			@RequestParam(name="h", required=false, defaultValue="500") String _height,
 			@RequestParam(name="i", required=false, defaultValue="4") String _iterations,
-			@RequestParam(name="satellites", required=false, defaultValue="4") String _satellites,
+			@RequestParam(name="satellites", required=false, defaultValue="3") String _satellites,
 			@RequestParam(name="factor", required=false, defaultValue="0.5") String _factor,
 			@RequestParam(name="padding_w", required=false, defaultValue="40") String _padding_w,
 			@RequestParam(name="padding_h", required=false, defaultValue="40") String _padding_h,
@@ -183,8 +183,8 @@ public class GenerateFractalController
 		//WARNING: since we create a new Fractal2DEntity for each request and don't recycle IDs, the IDs could skyrocket quickly.
 		FractalCircleEntity newEntity = new FractalCircleEntity(fractalCircle);
 
-		// Generate on separate thread using Fractal2DRunner, if not duplicate request
-		FractalCircleEntity dbEntity = Fractal2DRunner_new.generate(newEntity);
+		// Generate on separate thread using Fractal2DRunner, if match not found in DB
+		FractalCircleEntity dbEntity = Fractal2DRunner_new.generate(newEntity, false);
 		FractalCircleEntity toUse = newEntity;
 		if (dbEntity == null) // not in DB yet
 		{

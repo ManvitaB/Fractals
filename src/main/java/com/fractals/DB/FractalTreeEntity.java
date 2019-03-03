@@ -42,7 +42,7 @@ public class FractalTreeEntity extends Fractal2DEntity<FractalTree>
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public FractalTreeEntityRepository getRepository()
+	public FractalTreeEntityRepository defaultRepository()
 	{
 		return DB.getFractalTreeEntities();
 	}

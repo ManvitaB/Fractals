@@ -16,14 +16,14 @@ import com.fractals.Fractal2D;
  * 					   Derived classes should add field(s) for their respective concrete Fractal2D type.
  * @author Scott Wolfskill
  * @created     02/27/2019
- * @last_edit   02/28/2019
+ * @last_edit   03/02/2019
  */
 @MappedSuperclass
 public abstract class Fractal2DEntity<T extends Fractal2D>
 {
-	public final String generatingLoadingMessage = "Generating...";
-	private final String defaultFractalImageDirectory = "images/";
-	private final long defaultExpirationPeriod = 10L * 1000L;	//default expiration period in milliseconds
+	public static final String generatingLoadingMessage = "Generating...";
+	private static final String defaultFractalImageDirectory = "images/";
+	private static final long defaultExpirationPeriod = 10L * 1000L;	//default expiration period in milliseconds
 	private static Long idCount = 0L;
 	
 	@Id
@@ -83,11 +83,11 @@ public abstract class Fractal2DEntity<T extends Fractal2D>
 	}
 	
 	/**
-	 * Gets the repository of a class extending Fractal2DEntity<E, T> 
+	 * Gets the default repository of a class extending Fractal2DEntity<E, T> 
 	 * where E is the derived class of Fractal2DEntity implementing the method.
-	 * @return
+	 * @return R class extending Fractal2DEntityRepository<E, T>
 	 */
-	public abstract <R extends Fractal2DEntityRepository<E, T>, E extends Fractal2DEntity<T>> R getRepository();
+	public abstract <R extends Fractal2DEntityRepository<E, T>, E extends Fractal2DEntity<T>> R defaultRepository();
 	
 	public abstract T getFractal2D();
 	

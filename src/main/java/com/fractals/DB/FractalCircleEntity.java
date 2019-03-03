@@ -43,7 +43,7 @@ public class FractalCircleEntity extends Fractal2DEntity<FractalCircle>
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public FractalCircleEntityRepository getRepository()
+	public FractalCircleEntityRepository defaultRepository()
 	{
 		return DB.getFractalCircleEntities();
 	}
