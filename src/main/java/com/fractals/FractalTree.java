@@ -2,15 +2,7 @@ package com.fractals;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.geom.Line2D;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.imageio.ImageIO;
 import javax.persistence.Embeddable;
 
 /**
@@ -18,7 +10,7 @@ import javax.persistence.Embeddable;
  * 				   with a specified angle between them for each existing node every iteration.
  * @author Scott Wolfskill
  * @created     02/12/2019
- * @last_edit   02/27/2019
+ * @last_edit   03/02/2019
  */
 @Embeddable
 public class FractalTree extends Fractal2D
@@ -45,9 +37,8 @@ public class FractalTree extends Fractal2D
 					   double scalingFactor, int padding_horizontal, int padding_vertical)
 	{
 		initialize(width, height, iterations, padding_horizontal, padding_vertical);
-		this.totalIterations = iterations;
-		this.angle = angle;
-		this.scalingFactor = scalingFactor;
+		setAngle(angle);
+		setScalingFactor(scalingFactor);
 	}
 	
 	@Override

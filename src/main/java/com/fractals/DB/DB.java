@@ -19,6 +19,8 @@ public class DB
 	private FractalTreeEntityRepository fractalTreeEntities;
 	@Autowired
 	private FractalCircleEntityRepository fractalCircleEntities;
+	@Autowired
+	private FractalFlowerEntityRepository fractalFlowerEntities;
 	
 	private DB() {}
 	
@@ -49,5 +51,15 @@ public class DB
 			System.out.println("DB WARNING: fractalCircleEntities was null!");
 		}
 		return db.fractalCircleEntities;
+	}
+	
+	public static FractalFlowerEntityRepository getFractalFlowerEntities()
+	{
+		DB db = getInstance();
+		if(db.fractalFlowerEntities == null)
+		{
+			System.out.println("DB WARNING: fractalFlowerEntities was null!");
+		}
+		return db.fractalFlowerEntities;
 	}
 }

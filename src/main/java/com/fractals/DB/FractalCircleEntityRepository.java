@@ -1,7 +1,5 @@
 package com.fractals.DB;
 
-import org.springframework.data.repository.CrudRepository;
-
 import com.fractals.FractalCircle;
 
 /**

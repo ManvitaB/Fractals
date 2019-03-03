@@ -157,6 +157,19 @@ public abstract class Fractal2D extends Fractal
 		gfx.draw(ellipse);
 	}
 	
+	protected void drawArc(double centerX, double centerY, double width, double height, double startAngle, double arcAngle)
+	{
+		int startAngle_deg = Math.round((float) Math.toDegrees(startAngle));
+		int arcAngle_deg = Math.round((float) Math.toDegrees(arcAngle));
+		int minX = Math.round((float) (centerX - (width / 2)));
+		int minY = Math.round((float) (centerY - (height / 2)));
+		int width_int = Math.round((float) width);
+		int height_int = Math.round((float) height);
+		System.out.println("drawArc:(" + centerX + "," + centerY
+				+ "); " + width_int + " x " + height_int + "; start=" + startAngle_deg + "; arcAngle=" + arcAngle_deg);
+		gfx.drawArc(minX, minY, width_int, height_int, startAngle_deg, arcAngle_deg);
+	}
+	
 	public int getWidth()
 	{
 		return width;

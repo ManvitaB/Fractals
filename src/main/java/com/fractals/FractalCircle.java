@@ -1,9 +1,5 @@
 package com.fractals;
 
-import java.awt.geom.Ellipse2D;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import javax.persistence.Embeddable;
 
 /**
@@ -11,7 +7,7 @@ import javax.persistence.Embeddable;
  * 					 for a set number of iterations.
  * @author Scott Wolfskill
  * @created     02/14/2019
- * @last_edit   02/27/2019
+ * @last_edit   03/02/2019
  */
 @Embeddable
 public class FractalCircle extends Fractal2D 
@@ -28,7 +24,7 @@ public class FractalCircle extends Fractal2D
 	 * @param width Width of the image to generate.
 	 * @param height Height of the image to generate.
 	 * @param iterations Number of fractal iterations to perform.
-	 * @param satellites Number of child node 'satellites' to generate per iteration.
+	 * @param satelliteCount Number of child node 'satellites' to generate per iteration.
 	 * @param scalingFactor Scaling factor for the radius of each child node in the fractal.
 	 * @param padding_horizontal Horizontal padding in the image to generate.
 	 * @param padding_vertical Vertical padding in the image to generate.
@@ -37,8 +33,8 @@ public class FractalCircle extends Fractal2D
 					     double scalingFactor, int padding_horizontal, int padding_vertical)
 	{
 		initialize(width, height, iterations, padding_horizontal, padding_vertical);
-		this.satelliteCount = satelliteCount;
-		this.scalingFactor = scalingFactor;
+		setSatelliteCount(satelliteCount);
+		setScalingFactor(scalingFactor);
 	}
 	
 	@Override
@@ -56,7 +52,7 @@ public class FractalCircle extends Fractal2D
 				return false;
 			}
 		} catch (Exception e) {
-			System.out.println("FractalTree.equals: " + e.getClass().getName() + " '" + e.getMessage() + "'.");
+			System.out.println("FractalCircle.equals: " + e.getClass().getName() + " '" + e.getMessage() + "'.");
 			return false;
 		}
 		return true;
