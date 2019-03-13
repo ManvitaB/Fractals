@@ -81,15 +81,12 @@ public class FractalFlower extends Fractal2D
 		double centerY = height / 2;
 		double startRadius = initialRadiusFactor * Math.min(usableWidth, usableHeight);
 		double startArcAngle = 2 * Math.PI; //whole circle
-		//double startArcLength = startRadius * startArcAngle;
-		//
 		gfx.setColor(Color.white);
-		//
-		iterate(centerX, centerY, startRadius, startArcAngle, 0, /*startArcLength,*/ totalIterations);
+		iterate(centerX, centerY, startRadius, startArcAngle, 0, totalIterations);
 	}
 	
 	private void iterate(double centerX, double centerY, double radius, double arcAngle, 
-						 double rotation, /*double arcLength,*/ int iterationsRemaining)
+						 double rotation, int iterationsRemaining)
 	{
 		final String msgPrefix = "FractalFlower.iterate: ";
 		if(cancelled != null && cancelled.get()) {
@@ -125,7 +122,7 @@ public class FractalFlower extends Fractal2D
 			
 			double childCenterX = distToChildCenter * Math.cos(childRotation) + centerX;
 			double childCenterY = distToChildCenter * Math.sin(-1.0f * childRotation) + centerY;
-			iterate(childCenterX, childCenterY, childRadius, childArcAngle, childRotation, /*childArcLength,*/ iterationsRemaining - 1);
+			iterate(childCenterX, childCenterY, childRadius, childArcAngle, childRotation, iterationsRemaining - 1);
 		}
 	}
 	

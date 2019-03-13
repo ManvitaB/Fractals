@@ -224,7 +224,7 @@ public class GenerateFractalController
 	public String generateFractalFlower(
 			@RequestParam(name="w", required=false, defaultValue="700") String _width,
 			@RequestParam(name="h", required=false, defaultValue="500") String _height,
-			@RequestParam(name="i", required=false, defaultValue="4") String _iterations,
+			@RequestParam(name="i", required=false, defaultValue="5") String _iterations,
 			@RequestParam(name="petals", required=false, defaultValue="8") String _petals,
 			@RequestParam(name="arcAngle", required=false, defaultValue="180") String _arcAngle,
 			@RequestParam(name="factor", required=false, defaultValue="0.5") String _factor,

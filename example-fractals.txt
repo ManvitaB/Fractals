@@ -15,3 +15,11 @@ size: 700 x 500
 iterations: 10
 satellites: 3
 scaling factor: 0.54
+
+example-fractal-flower.png was generated with these parameters:
+size: 700 x 500
+iterations: 5
+petals: 8
+arc angle: 180 degrees
+scaling factor: 0.5
+scaling power: 2.0
