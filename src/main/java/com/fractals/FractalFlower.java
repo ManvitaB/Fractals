@@ -8,14 +8,17 @@ import javax.persistence.Embeddable;
  * FractalFlower --- Represents a Fractal2D created by drawing flower petals as semicircles around a central circle.
  * @author Scott Wolfskill
  * @created     03/02/2019
- * @last_edit   03/02/2019
+ * @last_edit   03/12/2019
  */
 @Embeddable
 public class FractalFlower extends Fractal2D 
 {
 	protected int petalCount;       //Number of child node petals to generate per iteration
 	protected double arcAngle;		//Angle (radians) that child node petal arcs should span (e.g. pi for semicircle)
-	protected double scalingFactor;  //Scaling factor for the arc length of each child node in the fractal
+	protected double scalingFactor;  	//Scaling factor for the radius of each child node in the fractal
+	protected double scalingPower;   	//Exponent power to raise scalingFactor to
+	
+	private transient double raisedScalingFactor; //sqrt(scalingFactor^scalingPower)
 	
 	private static double initialRadiusFactor = 0.20; //set initial radius to be 20% of min(usableWidth, usableHeight)'s value
 	
@@ -33,12 +36,13 @@ public class FractalFlower extends Fractal2D
 	 * @param padding_vertical Vertical padding in the image to generate.
 	 */
 	public FractalFlower(int width, int height, int iterations, int petalCount, double arcAngle,
-						 double scalingFactor, int padding_horizontal, int padding_vertical)
+						 double scalingFactor, double scalingPower, int padding_horizontal, int padding_vertical)
 	{
 		initialize(width, height, iterations, padding_horizontal, padding_vertical);
 		setPetalCount(petalCount);
 		setArcAngle(arcAngle);
 		setScalingFactor(scalingFactor);
+		setScalingPower(scalingPower);
 	}
 	
 	@Override
@@ -52,7 +56,8 @@ public class FractalFlower extends Fractal2D
 			FractalFlower o = (FractalFlower) other;
 			if(petalCount != o.petalCount ||
 			   arcAngle != o.arcAngle ||
-			   scalingFactor != o.scalingFactor)
+			   scalingFactor != o.scalingFactor ||
+			   scalingPower != o.scalingPower)
 			{
 				return false;
 			}
@@ -76,15 +81,15 @@ public class FractalFlower extends Fractal2D
 		double centerY = height / 2;
 		double startRadius = initialRadiusFactor * Math.min(usableWidth, usableHeight);
 		double startArcAngle = 2 * Math.PI; //whole circle
-		double startArcLength = startRadius * startArcAngle;
+		//double startArcLength = startRadius * startArcAngle;
 		//
 		gfx.setColor(Color.white);
 		//
-		iterate(centerX, centerY, startRadius, startArcAngle, 0, startArcLength, totalIterations);
+		iterate(centerX, centerY, startRadius, startArcAngle, 0, /*startArcLength,*/ totalIterations);
 	}
 	
 	private void iterate(double centerX, double centerY, double radius, double arcAngle, 
-						 double rotation, double arcLength, int iterationsRemaining)
+						 double rotation, /*double arcLength,*/ int iterationsRemaining)
 	{
 		final String msgPrefix = "FractalFlower.iterate: ";
 		if(cancelled != null && cancelled.get()) {
@@ -93,19 +98,17 @@ public class FractalFlower extends Fractal2D
 		if(iterationsRemaining <= 0) {
 			return;
 		}
-		if(arcLength <= 0) {
-			System.out.println(msgPrefix + " arcLength (" + arcLength + ") became too small! ");
+		if(radius <= 0) {
+			System.out.println(msgPrefix + " radius (" + radius + ") became too small! ");
 			return;
 		}
 		//1. Draw parent arc around (centerX, centerY)
 		double start = (arcAngle / -2.0f) + rotation; //start pt. of the arc on the circle (r, start) in polar coords
-		//double end =   (arcAngle /  1.0f) + rotation; //end pt. of the arc on the circle   (r, end) in polar coords
 		drawArc(centerX, centerY, radius * 2, radius * 2, start, arcAngle);
 		
 		//2. Calculate info and call iterate on each child petal recursively
 		double childArcAngle = this.arcAngle;
-		double childArcLength = scalingFactor * arcLength;
-		double childRadius = childArcLength / childArcAngle;
+		double childRadius = raisedScalingFactor * radius;
 		
 		for(int i = 0; i < petalCount; i++)
 		{
@@ -115,17 +118,20 @@ public class FractalFlower extends Fractal2D
 			double distToChildCenter = radius * Math.sin(parentToChildAngle) / Math.sin(parentToChildStartAngle); //u distance between (centerX, centerY) and (childCenterX, childCenterY)
 			double childRotation;
 			if(petalCount > 1) {
-				//childRotation = (arcAngle / -2.0f) + (i * arcAngle / (petalCount - 1)) + rotation;
 				childRotation = (arcAngle / -2.0f + arcAngle / (2*petalCount)) + (i * arcAngle / petalCount) + rotation;
 			} else {
 				childRotation = rotation;
 			}
-			System.out.println("itersLeft=" + iterationsRemaining + ";start=" + Math.toDegrees(start) + "; i=" + i + "; childRot=" + Math.toDegrees(childRotation));
 			
 			double childCenterX = distToChildCenter * Math.cos(childRotation) + centerX;
 			double childCenterY = distToChildCenter * Math.sin(-1.0f * childRotation) + centerY;
-			iterate(childCenterX, childCenterY, childRadius, childArcAngle, childRotation, childArcLength, iterationsRemaining - 1);
+			iterate(childCenterX, childCenterY, childRadius, childArcAngle, childRotation, /*childArcLength,*/ iterationsRemaining - 1);
 		}
+	}
+	
+	private void setRaisedScalingFactor()
+	{
+		raisedScalingFactor = Math.pow(scalingFactor, scalingPower / 2);
 	}
 	
 	public int getPetalCount()
@@ -156,6 +162,18 @@ public class FractalFlower extends Fractal2D
 	public void setScalingFactor(double scalingFactor)
 	{
 		this.scalingFactor = scalingFactor;
+		setRaisedScalingFactor();
+	}
+	
+	public double getScalingPower()
+	{
+		return scalingPower;
+	}
+	
+	public void setScalingPower(double scalingPower)
+	{
+		this.scalingPower = scalingPower;
+		setRaisedScalingFactor();
 	}
 
 }

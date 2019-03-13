@@ -25,7 +25,7 @@ import javax.persistence.MappedSuperclass;
  * 				 that is generated on an image and can be saved to the disk.
  * @author Scott Wolfskill
  * @created     02/12/2019
- * @last_edit   02/28/2019
+ * @last_edit   03/12/2019
  */
 @MappedSuperclass
 public abstract class Fractal2D extends Fractal 
@@ -165,8 +165,6 @@ public abstract class Fractal2D extends Fractal
 		int minY = Math.round((float) (centerY - (height / 2)));
 		int width_int = Math.round((float) width);
 		int height_int = Math.round((float) height);
-		System.out.println("drawArc:(" + centerX + "," + centerY
-				+ "); " + width_int + " x " + height_int + "; start=" + startAngle_deg + "; arcAngle=" + arcAngle_deg);
 		gfx.drawArc(minX, minY, width_int, height_int, startAngle_deg, arcAngle_deg);
 	}
 	
