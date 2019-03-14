@@ -25,7 +25,7 @@ import javax.persistence.MappedSuperclass;
  * 				 that is generated on an image and can be saved to the disk.
  * @author Scott Wolfskill
  * @created     02/12/2019
- * @last_edit   03/12/2019
+ * @last_edit   03/13/2019
  */
 @MappedSuperclass
 public abstract class Fractal2D extends Fractal 
@@ -37,6 +37,8 @@ public abstract class Fractal2D extends Fractal
 	protected int height;			  //height of fractal image to generate
 	protected int padding_horizontal; //padding (px) for left/right sides of generated image
 	protected int padding_vertical;   //padding (px) for top/bottom sides of generated image
+	protected double zoomFactor;      //multiplier in [0, 1] to scale start element by relative to usable width & height.
+	protected double rotation; 		  //global rotation of the fractal in radians
 	protected transient BufferedImage image;    //image to draw the fractal onto
 	protected transient Graphics2D gfx;		  //Graphics of image
 	
@@ -61,7 +63,9 @@ public abstract class Fractal2D extends Fractal
 		   width != other.width ||
 		   height != other.height ||
 		   padding_horizontal != other.padding_horizontal ||
-		   padding_vertical != other.padding_vertical) 
+		   padding_vertical != other.padding_vertical ||
+		   zoomFactor != other.zoomFactor ||
+		   rotation != other.rotation) 
 		{
 			return false;
 		}
@@ -120,13 +124,16 @@ public abstract class Fractal2D extends Fractal
 		return fullpath;
 	}
 	
-	protected void initialize(int width, int height, int iterations, int padding_horizontal, int padding_vertical) 
+	protected void initialize(int width, int height, int iterations, double zoomFactor, 
+							  double rotation, int padding_horizontal, int padding_vertical) 
 	{
-		this.width = width;
-		this.height = height;
-		this.totalIterations = iterations;
-		this.padding_horizontal = padding_horizontal;
-		this.padding_vertical = padding_vertical;
+		setWidth(width);
+		setHeight(height);
+		setTotalIterations(iterations);
+		setZoomFactor(zoomFactor);
+		setRotation(rotation);
+		setPadding_horizontal(padding_horizontal);
+		setPadding_vertical(padding_vertical);
 		image = null;
 		gfx = null;
 		cancelled = new AtomicBoolean(false);
@@ -186,6 +193,26 @@ public abstract class Fractal2D extends Fractal
 	public void setHeight(int height)
 	{
 		this.height = height;
+	}
+	
+	public double getZoomFactor()
+	{
+		return zoomFactor;
+	}
+	
+	public void setZoomFactor(double zoomFactor)
+	{
+		this.zoomFactor = zoomFactor;
+	}
+	
+	public double getRotation()
+	{
+		return rotation;
+	}
+	
+	public void setRotation(double rotation)
+	{
+		this.rotation = rotation;
 	}
 	
 	public int getPadding_horizontal()

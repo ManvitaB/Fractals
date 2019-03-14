@@ -196,7 +196,7 @@ public class Helper
 	
 	public static String makeParseFailedMessage_int(int min, int max, String paramName)
 	{
-		return makeParseFailedMessage(min, max, paramName, "integer");
+		return makeParseFailedMessage(min, max, paramName, "an integer");
 	}
 	
 	public static String makeParseFailedMessage_long(String paramName)
@@ -206,7 +206,7 @@ public class Helper
 	
 	public static String makeParseFailedMessage_long(long min, long max, String paramName)
 	{
-		return makeParseFailedMessage(min, max, paramName, "integer (long supported)");
+		return makeParseFailedMessage(min, max, paramName, "an integer");
 	}
 	
 	public static String makeParseFailedMessage_double(String paramName)
@@ -216,12 +216,12 @@ public class Helper
 	
 	public static String makeParseFailedMessage_double(double min, double max, String paramName)
 	{
-		return makeParseFailedMessage(min, max, paramName, "real number (double precision)");
+		return makeParseFailedMessage(min, max, paramName, "a rational number");
 	}
 	
 	public static String makeParseFailedMessage(Object min, Object max, String paramName, String paramType)
 	{
 		return "Failed to parse " + paramName + " parameter: please input "
-			     + paramName + " as a " + paramType + " in range [" + min + ", " + max + "].";
+			     + paramName + " as " + paramType + " in range [" + min + ", " + max + "].";
 	}
 }

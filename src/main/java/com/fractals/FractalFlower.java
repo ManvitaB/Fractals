@@ -8,7 +8,7 @@ import javax.persistence.Embeddable;
  * FractalFlower --- Represents a Fractal2D created by drawing flower petals as semicircles around a central circle.
  * @author Scott Wolfskill
  * @created     03/02/2019
- * @last_edit   03/12/2019
+ * @last_edit   03/13/2019
  */
 @Embeddable
 public class FractalFlower extends Fractal2D 
@@ -19,9 +19,7 @@ public class FractalFlower extends Fractal2D
 	protected double scalingPower;   	//Exponent power to raise scalingFactor to
 	
 	private transient double raisedScalingFactor; //sqrt(scalingFactor^scalingPower)
-	
-	private static double initialRadiusFactor = 0.20; //set initial radius to be 20% of min(usableWidth, usableHeight)'s value
-	
+		
 	public FractalFlower() {} //Embeddable must define default CTOR
 	
 	/**
@@ -32,13 +30,15 @@ public class FractalFlower extends Fractal2D
 	 * @param petalCount Number of child node petals to generate per iteration.
 	 * @param arcAngle Angle (radians) that child node petal arcs should span (e.g. pi for semicircle)
 	 * @param scalingFactor Scaling factor for the arc length of each child node in the fractal.
+	 * @param zoomFactor Multiplier to scale start element by relative to usable width & height.
+	 * @param rotation Global rotation in radians of the FractalFlower, starting from 3 o'clock CCW. 
 	 * @param padding_horizontal Horizontal padding in the image to generate.
 	 * @param padding_vertical Vertical padding in the image to generate.
 	 */
-	public FractalFlower(int width, int height, int iterations, int petalCount, double arcAngle,
-						 double scalingFactor, double scalingPower, int padding_horizontal, int padding_vertical)
+	public FractalFlower(int width, int height, int iterations, int petalCount, double arcAngle, double scalingFactor,
+						 double scalingPower, double zoomFactor, double rotation, int padding_horizontal, int padding_vertical)
 	{
-		initialize(width, height, iterations, padding_horizontal, padding_vertical);
+		initialize(width, height, iterations, zoomFactor, rotation, padding_horizontal, padding_vertical);
 		setPetalCount(petalCount);
 		setArcAngle(arcAngle);
 		setScalingFactor(scalingFactor);
@@ -79,14 +79,14 @@ public class FractalFlower extends Fractal2D
 		double usableHeight = height - 2 * padding_horizontal;
 		double centerX = width / 2;
 		double centerY = height / 2;
-		double startRadius = initialRadiusFactor * Math.min(usableWidth, usableHeight);
+		double startRadius = zoomFactor * Math.min(usableWidth, usableHeight);
 		double startArcAngle = 2 * Math.PI; //whole circle
 		gfx.setColor(Color.white);
-		iterate(centerX, centerY, startRadius, startArcAngle, 0, totalIterations);
+		iterate(centerX, centerY, startRadius, startArcAngle, rotation, totalIterations);
 	}
 	
 	private void iterate(double centerX, double centerY, double radius, double arcAngle, 
-						 double rotation, int iterationsRemaining)
+						 double currRotation, int iterationsRemaining)
 	{
 		final String msgPrefix = "FractalFlower.iterate: ";
 		if(cancelled != null && cancelled.get()) {
@@ -100,7 +100,7 @@ public class FractalFlower extends Fractal2D
 			return;
 		}
 		//1. Draw parent arc around (centerX, centerY)
-		double start = (arcAngle / -2.0f) + rotation; //start pt. of the arc on the circle (r, start) in polar coords
+		double start = (arcAngle / -2.0f) + currRotation; //start pt. of the arc on the circle (r, start) in polar coords
 		drawArc(centerX, centerY, radius * 2, radius * 2, start, arcAngle);
 		
 		//2. Calculate info and call iterate on each child petal recursively
@@ -115,9 +115,9 @@ public class FractalFlower extends Fractal2D
 			double distToChildCenter = radius * Math.sin(parentToChildAngle) / Math.sin(parentToChildStartAngle); //u distance between (centerX, centerY) and (childCenterX, childCenterY)
 			double childRotation;
 			if(petalCount > 1) {
-				childRotation = (arcAngle / -2.0f + arcAngle / (2*petalCount)) + (i * arcAngle / petalCount) + rotation;
+				childRotation = (arcAngle / -2.0f + arcAngle / (2*petalCount)) + (i * arcAngle / petalCount) + currRotation;
 			} else {
-				childRotation = rotation;
+				childRotation = currRotation;
 			}
 			
 			double childCenterX = distToChildCenter * Math.cos(childRotation) + centerX;

@@ -7,16 +7,14 @@ import javax.persistence.Embeddable;
  * 					 for a set number of iterations.
  * @author Scott Wolfskill
  * @created     02/14/2019
- * @last_edit   03/02/2019
+ * @last_edit   03/13/2019
  */
 @Embeddable
 public class FractalCircle extends Fractal2D 
 {
 	protected int satelliteCount;   //Number of child node 'satellites' to generate per iteration
 	protected double scalingFactor; //Scaling factor for the radius of each child node in the fractal
-	
-	private static double initialRadiusFactor = 0.20; //set initial radius to be 20% of min(usableWidth, usableHeight)'s value
-	
+		
 	public FractalCircle() {} //Embeddable must define default CTOR
 	
 	/**
@@ -26,13 +24,15 @@ public class FractalCircle extends Fractal2D
 	 * @param iterations Number of fractal iterations to perform.
 	 * @param satelliteCount Number of child node 'satellites' to generate per iteration.
 	 * @param scalingFactor Scaling factor for the radius of each child node in the fractal.
+	 * @param zoomFactor Multiplier to scale start element by relative to usable width & height.
+	 * @param rotation Global rotation in radians of the FractalCircle, starting from 3 o'clock CCW. 
 	 * @param padding_horizontal Horizontal padding in the image to generate.
 	 * @param padding_vertical Vertical padding in the image to generate.
 	 */
-	public FractalCircle(int width, int height, int iterations, int satelliteCount, 
-					     double scalingFactor, int padding_horizontal, int padding_vertical)
+	public FractalCircle(int width, int height, int iterations, int satelliteCount, double scalingFactor,
+					     double zoomFactor, double rotation, int padding_horizontal, int padding_vertical)
 	{
-		initialize(width, height, iterations, padding_horizontal, padding_vertical);
+		initialize(width, height, iterations, zoomFactor, rotation, padding_horizontal, padding_vertical);
 		setSatelliteCount(satelliteCount);
 		setScalingFactor(scalingFactor);
 	}
@@ -69,7 +69,7 @@ public class FractalCircle extends Fractal2D
 		double usableHeight = height - 2 * padding_horizontal;
 		double centerX = width / 2;
 		double centerY = height / 2;
-		double startRadius = initialRadiusFactor * Math.min(usableWidth, usableHeight);
+		double startRadius = zoomFactor * Math.min(usableWidth, usableHeight);
 		iterate(centerX, centerY, startRadius, totalIterations);
 	}
 	
@@ -95,7 +95,7 @@ public class FractalCircle extends Fractal2D
 		
 		for(int i = 0; i < satelliteCount; i++)
 		{
-			double childAngle_rad = (2 * Math.PI * i) / satelliteCount;
+			double childAngle_rad = (2 * Math.PI * i) / satelliteCount + rotation;
 			double childCenterX = radiiSum * Math.cos(childAngle_rad) + centerX;
 			double childCenterY = radiiSum * Math.sin(childAngle_rad) + centerY;
 			iterate(childCenterX, childCenterY, childRadius, iterationsRemaining - 1);

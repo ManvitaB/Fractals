@@ -10,7 +10,7 @@ import org.junit.Test;
  * FractalFlowerTest --- Contains Tests for FractalFlower related to its equals method.
  * @author Scott Wolfskill
  * @created     03/02/2019
- * @last_edit   03/02/2019
+ * @last_edit   03/13/2019
  */
 public class FractalFlowerTest 
 {
@@ -23,19 +23,21 @@ public class FractalFlowerTest
 	@BeforeClass
 	public static void setUp()
 	{
-		a = new FractalFlower(1, 2, 3, 4, 5, 6, 7, 8, 9);
-		a_equals = new FractalFlower(1, 2, 3, 4, 5, 6, 7, 8, 9);
-		b = new FractalFlower[9];
-		b[0] = new FractalFlower(100, 2, 3, 4, 5, 6, 7, 8, 9);
-		b[1] = new FractalFlower(1, 200, 3, 4, 5, 6, 7, 8, 9);
-		b[2] = new FractalFlower(1, 2, 334, 4, 5, 6, 7, 8, 9);
-		b[3] = new FractalFlower(1, 2, 3, 600, 5, 6, 7, 8, 9);
-		b[4] = new FractalFlower(1, 2, 3, 4, 500, 6, 7, 8, 9);
-		b[5] = new FractalFlower(1, 2, 3, 4, 5, 600, 7, 8, 9);
-		b[6] = new FractalFlower(1, 2, 3, 4, 5, 6, 700, 8, 9);
-		b[7] = new FractalFlower(1, 2, 3, 4, 5, 6, 7, 800, 9);
-		b[8] = new FractalFlower(1, 2, 3, 4, 5, 6, 7, 8, 900);
-		fractalCircle = new FractalCircle(1, 2, 3, 4, 5, 6, 7);
+		a = new FractalFlower(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11);
+		a_equals = new FractalFlower(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11);
+		b = new FractalFlower[11];
+		b[0] = new FractalFlower(100, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11);
+		b[1] = new FractalFlower(1, 200, 3, 4, 5, 6, 7, 8, 9, 10, 11);
+		b[2] = new FractalFlower(1, 2, 334, 4, 5, 6, 7, 8, 9, 10, 11);
+		b[3] = new FractalFlower(1, 2, 3, 600, 5, 6, 7, 8, 9, 10, 11);
+		b[4] = new FractalFlower(1, 2, 3, 4, 500, 6, 7, 8, 9, 10, 11);
+		b[5] = new FractalFlower(1, 2, 3, 4, 5, 600, 7, 8, 9, 10, 11);
+		b[6] = new FractalFlower(1, 2, 3, 4, 5, 6, 700, 8, 9, 10, 11);
+		b[7] = new FractalFlower(1, 2, 3, 4, 5, 6, 7, 800, 9, 10, 11);
+		b[8] = new FractalFlower(1, 2, 3, 4, 5, 6, 7, 8, 900, 10, 11);
+		b[9] = new FractalFlower(1, 2, 3, 4, 5, 6, 7, 8, 9, 1000, 11);
+		b[10] = new FractalFlower(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 110);
+		fractalCircle = new FractalCircle(1, 2, 3, 4, 5, 6, 7, 8, 9);
 	}
 	
 	@Test

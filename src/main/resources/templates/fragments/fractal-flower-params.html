@@ -5,9 +5,7 @@
 	<link href="css/style.css" rel="stylesheet">
 </head>
 	<form id="frmParams" th:fragment="params" th:action="${action}">
-		<p>Width: <input type="text" class="input-text" name="w" th:value="${width}"> px</p>
-		<p>Height: <input type="text" class="input-text" name="h" th:value="${height}"> px</p>
-		<p>Iterations: <input type="text" class="input-text" name="i" th:value="${iterations}"></p>
+		<div th:replace="fragments/fractal2D-params.html :: params"></div>
 		<p>Petals: <input type="text" class="input-text" name="petals" th:value="${petals}"></p>
 		<p>Arc Angle: <input type="text" class="input-text" name="arcAngle" th:value="${arcAngle}" th:text="'&deg'"></p>
 		<p>Scaling Factor: <input type="text" class="input-text" name="factor" th:value="${factor}"></p>

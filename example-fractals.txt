@@ -1,24 +1,32 @@
 example-fractal-tree.png was generated with these parameters:
 size: 500 x 500
 iterations: 14
+zoom: 20%
+rotation: 90 degrees
 angle: 60 degrees
 scaling factor: 0.77
 
 example-fractal-circle.png was generated with these parameters:
 size: 700 x 500
 iterations: 4
+zoom: 20%
+rotation: 0 degrees
 satellites: 10
 scaling factor: 0.5
 
 example-fractal-circle-sierpinski.png was generated with these parameters:
 size: 700 x 500
 iterations: 10
+zoom: 20%
+rotation: 0 degrees
 satellites: 3
 scaling factor: 0.54
 
 example-fractal-flower.png was generated with these parameters:
 size: 700 x 500
 iterations: 5
+zoom: 30%
+rotation: 0 degrees
 petals: 8
 arc angle: 180 degrees
 scaling factor: 0.5

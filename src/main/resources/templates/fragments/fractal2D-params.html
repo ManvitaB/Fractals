@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<link href="css/style.css" rel="stylesheet">
+</head>
+	<div th:fragment="params">
+		<p>Width: <input type="text" class="input-text" name="w" th:value="${width}"> px</p>
+		<p>Height: <input type="text" class="input-text" name="h" th:value="${height}"> px</p>
+		<p>Iterations: <input type="text" class="input-text" name="i" th:value="${iterations}"></p>
+		<p>Zoom: <input type="text" class="input-text" name="z" th:value="${zoom}">%</p>
+		<p>Rotation: <input type="text" class="input-text" name="rot" th:value="${rotation}" th:text="'&deg'"></p>
+	</div>
+</html>

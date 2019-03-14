@@ -10,16 +10,13 @@ import javax.persistence.Embeddable;
  * 				   with a specified angle between them for each existing node every iteration.
  * @author Scott Wolfskill
  * @created     02/12/2019
- * @last_edit   03/02/2019
+ * @last_edit   03/13/2019
  */
 @Embeddable
 public class FractalTree extends Fractal2D
 {
 	protected double angle;		      //angle (radians) created between existing line segment
 	protected double scalingFactor;	  //factor to scale line segment length by each iteration
-	
-	private static double initialSegmentLengthFactor = 0.20; //set initial segmentLength to be 20% of usableHeight's value
-	private static double initialAngle_deg = 90; //initial angle (degrees) of the 1st line segment
 	
 	public FractalTree() {} //Embeddable must define default CTOR
 	
@@ -30,13 +27,15 @@ public class FractalTree extends Fractal2D
 	 * @param iterations Number of fractal iterations to perform.
 	 * @param angle Angle in radians between child nodes in the fractal.
 	 * @param scalingFactor Scaling factor for each child node in the fractal.
+	 * @param zoomFactor Multiplier to scale start element by relative to usable width & height.
+	 * @param rotation Global rotation in radians of the FractalTree, starting from 3 o'clock CCW. 
 	 * @param padding_horizontal Horizontal padding in the image to generate.
 	 * @param padding_vertical Vertical padding in the image to generate.
 	 */
-	public FractalTree(int width, int height, int iterations, double angle, 
-					   double scalingFactor, int padding_horizontal, int padding_vertical)
+	public FractalTree(int width, int height, int iterations, double angle, double scalingFactor,
+					   double zoomFactor, double rotation, int padding_horizontal, int padding_vertical)
 	{
-		initialize(width, height, iterations, padding_horizontal, padding_vertical);
+		initialize(width, height, iterations, zoomFactor, rotation, padding_horizontal, padding_vertical);
 		setAngle(angle);
 		setScalingFactor(scalingFactor);
 	}
@@ -68,21 +67,26 @@ public class FractalTree extends Fractal2D
 	@Override
 	public void generate()
 	{
-		//Set segmentLength to be a percent factor of the total usable height
+		//Set segmentLength to be a percent factor of the total usable width & height
 		//(taking into account padding on both top and bottom)
+		int usableWidth = width - 2 * padding_vertical;
 		int usableHeight = height - 2 * padding_vertical;
-		double segmentLength = initialSegmentLengthFactor * usableHeight;
+		double segmentLength = zoomFactor * Math.min(usableWidth, usableHeight);
 		
-		double startX = width / 2;
-		double startY = height - padding_vertical;
-		double endX = startX;
-		double endY = startY - segmentLength;
-		double startAngle = Math.toRadians(initialAngle_deg);
+		/* To use space effectively, start point is determined along an 
+		   ellispe with major axis usableWidth & minor axis usableHeight centered on the image. */
+		double ellipseAngle = rotation + Math.PI;
+		double centerX = width / 2.0;
+		double centerY = height / 2.0;
+		double startX = (usableWidth / 2.0) * Math.cos(ellipseAngle) + centerX;
+		double startY = (usableHeight / 2.0) * Math.sin(-1.0 * ellipseAngle) + centerY;
+		double endX = segmentLength * Math.cos(rotation) + startX;
+		double endY = segmentLength * Math.sin(-1.0 * rotation) + startY;
 		initImage();
 		/*gfx.setBackground(Color.DARK_GRAY); //update the color to set as background color when clearRect is called
 		gfx.clearRect(0, 0, width, height); //set width x height region with background color only
 		gfx.setColor(Color.blue);*/ //set paint color to use in future draw calls
-		iterate(startX, startY, endX, endY, startAngle, segmentLength, totalIterations); //begin iterating (iterationsRemaining) times
+		iterate(startX, startY, endX, endY, rotation, segmentLength, totalIterations); //begin iterating (iterationsRemaining) times
 	}
 	
 	private void iterate(double startX, double startY, double endX, double endY, 
