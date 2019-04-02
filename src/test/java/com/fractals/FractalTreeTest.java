@@ -10,7 +10,7 @@ import org.junit.Test;
  * FractalTreeTest --- Contains Tests for FractalTree related to its equals method.
  * @author Scott Wolfskill
  * @created     02/26/2019
- * @last_edit   02/26/2019
+ * @last_edit   03/13/2019
  */
 public class FractalTreeTest 
 {
@@ -23,17 +23,19 @@ public class FractalTreeTest
 	@BeforeClass
 	public static void setUp()
 	{
-		a = new FractalTree(1, 2, 3, 4, 5, 6, 7);
-		a_equals = new FractalTree(1, 2, 3, 4, 5, 6, 7);
-		b = new FractalTree[7];
-		b[0] = new FractalTree(100, 2, 3, 4, 5, 6, 7);
-		b[1] = new FractalTree(1, 200, 3, 4, 5, 6, 7);
-		b[2] = new FractalTree(1, 2, 634, 4, 5, 6, 7);
-		b[3] = new FractalTree(1, 2, 3, 600, 5, 6, 7);
-		b[4] = new FractalTree(1, 2, 3, 4, 500, 6, 7);
-		b[5] = new FractalTree(1, 2, 3, 4, 5, 600, 7);
-		b[6] = new FractalTree(1, 2, 3, 4, 5, 6, 700);
-		fractalCircle = new FractalCircle(1, 2, 3, 4, 5, 6, 7);
+		a = new FractalTree(1, 2, 3, 4, 5, 6, 7, 8, 9);
+		a_equals = new FractalTree(1, 2, 3, 4, 5, 6, 7, 8, 9);
+		b = new FractalTree[9];
+		b[0] = new FractalTree(100, 2, 3, 4, 5, 6, 7, 8, 9);
+		b[1] = new FractalTree(1, 200, 3, 4, 5, 6, 7, 8, 9);
+		b[2] = new FractalTree(1, 2, 634, 4, 5, 6, 7, 8, 9);
+		b[3] = new FractalTree(1, 2, 3, 600, 5, 6, 7, 8, 9);
+		b[4] = new FractalTree(1, 2, 3, 4, 500, 6, 7, 8, 9);
+		b[5] = new FractalTree(1, 2, 3, 4, 5, 600, 7, 8, 9);
+		b[6] = new FractalTree(1, 2, 3, 4, 5, 6, 700, 8, 9);
+		b[7] = new FractalTree(1, 2, 3, 4, 5, 6, 7, 800, 9);
+		b[8] = new FractalTree(1, 2, 3, 4, 5, 6, 7, 8, 900);
+		fractalCircle = new FractalCircle(1, 2, 3, 4, 5, 6, 7, 8, 9);
 	}
 	
 	@Test

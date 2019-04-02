@@ -82,24 +82,56 @@ public class Helper
 		return directories;
 	}
 	
-	public static int parseNonNegativeInt(String toParse) throws NumberFormatException
+	public static int parseInt(int min, int max, String toParse) throws NumberFormatException
 	{
+		final String msg = "Int parsed was outside accepted range [" + min + ", " + max + "].";
 		int value = Integer.parseInt(toParse);
-		if(value < 0) throw new NumberFormatException("Was parsed as a negative int (" + value + ").");
+		if(value < min) throw new NumberFormatException(msg);
+		else if(value > max) throw new NumberFormatException(msg);
 		return value;
+	}
+	
+	public static long parseLong(long min, long max, String toParse) throws NumberFormatException
+	{
+		final String msg = "Long parsed was outside accepted range [" + min + ", " + max + "].";
+		long value = Long.parseLong(toParse);
+		if(value < min) throw new NumberFormatException(msg);
+		else if(value > max) throw new NumberFormatException(msg);
+		return value;
+	}
+	
+	public static double parseDouble(double min, double max, String toParse) throws Exception
+	{
+		final String msg = "Double parsed was outside accepted range [" + min + ", " + max + "].";
+		double value = Double.parseDouble(toParse);
+		if(value < min) throw new NumberFormatException(msg);
+		else if(value > max) throw new NumberFormatException(msg);
+		return value;
+	}
+	
+	public static int parseIntParam(String paramName, @NonNull String toParse, 
+			@NonNull Wrapper<String> parseFailedMessage) throws NumberFormatException
+	{
+		return parseIntParam(Integer.MIN_VALUE, Integer.MAX_VALUE, paramName, toParse, parseFailedMessage);
 	}
 	
 	public static int parseNonNegativeIntParam(String paramName, @NonNull String toParse, 
 			@NonNull Wrapper<String> parseFailedMessage) throws NumberFormatException
 	{
+		return parseIntParam(0, Integer.MAX_VALUE, paramName, toParse, parseFailedMessage);
+	}
+	
+	public static int parseIntParam(int min, int max, String paramName, @NonNull String toParse, 
+			@NonNull Wrapper<String> parseFailedMessage) throws NumberFormatException
+	{
 		try 
 		{
-			int value = parseNonNegativeInt(toParse);
+			int value = parseInt(min, max, toParse);
 			return value;
 		} 
 		catch (NumberFormatException e) 
 		{
-			parseFailedMessage.value = makeParseFailedMessage_nonNegativeInt(paramName);
+			parseFailedMessage.value = makeParseFailedMessage_int(min, max, paramName);
 			throw e;
 		}
 	}
@@ -107,51 +139,89 @@ public class Helper
 	public static long parseLongParam(String paramName, @NonNull String toParse, 
 			@NonNull Wrapper<String> parseFailedMessage) throws NumberFormatException
 	{
-		try 
-		{
-			long value = Long.parseLong(toParse);
-			return value;
-		}
-		catch (NumberFormatException e)
-		{
-			parseFailedMessage.value = makeParseFailedMessage_long(paramName);
-			throw e;
-		}
+		return parseLongParam(Long.MIN_VALUE, Long.MAX_VALUE, paramName, toParse, parseFailedMessage);
 	}
-
-	public static double parseDoubleParam(String paramName, @NonNull String toParse, 
+	
+	public static long parseLongParam(long min, long max, String paramName, @NonNull String toParse, 
 			@NonNull Wrapper<String> parseFailedMessage) throws NumberFormatException
 	{
 		try 
 		{
-			double value = Double.parseDouble(toParse);
+			long value = parseLong(min, max, toParse);
 			return value;
 		}
 		catch (NumberFormatException e)
 		{
-			parseFailedMessage.value = makeParseFailedMessage_double(paramName);
+			parseFailedMessage.value = makeParseFailedMessage_long(min, max, paramName);
+			throw e;
+		}
+	}
+	
+	public static double parseDoubleParam(String paramName, @NonNull String toParse, 
+			@NonNull Wrapper<String> parseFailedMessage) throws Exception
+	{
+		return parseDoubleParam(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, paramName, toParse, parseFailedMessage);
+	}
+	
+	public static double parseNonNegativeDoubleParam(String paramName, @NonNull String toParse, 
+			@NonNull Wrapper<String> parseFailedMessage) throws Exception
+	{
+		return parseDoubleParam(0.0, Double.POSITIVE_INFINITY, paramName, toParse, parseFailedMessage);
+	}
+
+	public static double parseDoubleParam(double min, double max, String paramName, @NonNull String toParse, 
+			@NonNull Wrapper<String> parseFailedMessage) throws Exception
+	{
+		try 
+		{
+			double value = parseDouble(min, max, toParse);
+			return value;
+		}
+		catch (Exception e)
+		{
+			parseFailedMessage.value = makeParseFailedMessage_double(min, max, paramName);
 			throw e;
 		}
 	}
 	
 	public static String makeParseFailedMessage_nonNegativeInt(String paramName)
 	{
-		return makeParseFailedMessage(paramName, "non-negative integer");
+		return makeParseFailedMessage_int(0, Integer.MAX_VALUE, paramName);
+	}
+	
+	public static String makeParseFailedMessage_int(String paramName)
+	{
+		return makeParseFailedMessage_int(Integer.MIN_VALUE, Integer.MAX_VALUE, paramName);
+	}
+	
+	public static String makeParseFailedMessage_int(int min, int max, String paramName)
+	{
+		return makeParseFailedMessage(min, max, paramName, "an integer");
 	}
 	
 	public static String makeParseFailedMessage_long(String paramName)
 	{
-		return makeParseFailedMessage(paramName, "integer (long supported)");
+		return makeParseFailedMessage_long(Long.MIN_VALUE, Long.MAX_VALUE, paramName);
+	}
+	
+	public static String makeParseFailedMessage_long(long min, long max, String paramName)
+	{
+		return makeParseFailedMessage(min, max, paramName, "an integer");
 	}
 	
 	public static String makeParseFailedMessage_double(String paramName)
 	{
-		return makeParseFailedMessage(paramName, "real number (double precision)");
+		return makeParseFailedMessage_double(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, paramName);
 	}
 	
-	public static String makeParseFailedMessage(String paramName, String paramType)
+	public static String makeParseFailedMessage_double(double min, double max, String paramName)
+	{
+		return makeParseFailedMessage(min, max, paramName, "a rational number");
+	}
+	
+	public static String makeParseFailedMessage(Object min, Object max, String paramName, String paramType)
 	{
 		return "Failed to parse " + paramName + " parameter: please input "
-			     + paramName + " as a " + paramType + ".";
+			     + paramName + " as " + paramType + " in range [" + min + ", " + max + "].";
 	}
 }

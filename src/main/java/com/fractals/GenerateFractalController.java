@@ -17,6 +17,7 @@ import com.fractals.DB.DB;
 import com.fractals.DB.Fractal2DEntity;
 import com.fractals.DB.Fractal2DEntityRepository;
 import com.fractals.DB.FractalCircleEntity;
+import com.fractals.DB.FractalFlowerEntity;
 import com.fractals.DB.FractalTreeEntity;
 
 /**
@@ -32,6 +33,7 @@ public class GenerateFractalController
 {	
 	private final String pageTitle_FractalTree = "Fractal Tree";
 	private final String pageTitle_FractalCircle = "Fractal Circles";
+	private final String pageTitle_FractalFlower = "Fractal Flower";
 	
 	/**
 	 * Queue a FractalTree for async generation, and return fractal.html
@@ -41,6 +43,8 @@ public class GenerateFractalController
 	 * @param _iterations Number of fractal iterations to perform.
 	 * @param _angle Angle in degrees between child nodes in the fractal.
 	 * @param _factor Scaling factor for each child node in the fractal.
+	 * @param _zoom Percent multiplier to scale start element by relative to usable width & height.
+	 * @param _rotation Global rotation in degrees of the FractalTree, starting from 3 o'clock CCW. 
 	 * @param _padding_w Horizontal padding in the image to generate.
 	 * @param _padding_h Vertical padding in the image to generate.
 	 * @param _model Thymeleaf page model
@@ -53,6 +57,8 @@ public class GenerateFractalController
 			@RequestParam(name="i", required=false, defaultValue="10") String _iterations,
 			@RequestParam(name="angle", required=false, defaultValue="60") String _angle,
 			@RequestParam(name="factor", required=false, defaultValue="0.77") String _factor,
+			@RequestParam(name="z", required=false, defaultValue="20") String _zoom,
+			@RequestParam(name="rot", required=false, defaultValue="90.0") String _rotation,
 			@RequestParam(name="padding_w", required=false, defaultValue="40") String _padding_w,
 			@RequestParam(name="padding_h", required=false, defaultValue="40") String _padding_h,
 			Model model)
@@ -65,32 +71,34 @@ public class GenerateFractalController
 			int height = Helper.parseNonNegativeIntParam("Height", _height, parseFailedMessage);
 			int iterations = Helper.parseNonNegativeIntParam("Iterations", _iterations, parseFailedMessage);
 			double angle = Helper.parseDoubleParam("Angle", _angle, parseFailedMessage);
-			double factor = Helper.parseDoubleParam("Scaling Factor", _factor, parseFailedMessage);
+			double factor = Helper.parseNonNegativeDoubleParam("Scaling Factor", _factor, parseFailedMessage);
+			double zoom = Helper.parseDoubleParam(0.0, Double.MAX_VALUE, "Zoom", _zoom, parseFailedMessage);
+			double rotation = Helper.parseDoubleParam("Rotation", _rotation, parseFailedMessage);
 			int padding_w = Helper.parseNonNegativeIntParam("padding_w", _padding_w, parseFailedMessage);
 			int padding_h = Helper.parseNonNegativeIntParam("padding_h", _padding_h, parseFailedMessage);
 			
 			//Parse success: perform actual generation
-			return _generateFractalTree(width, height, iterations, angle, factor, padding_w, 
-										padding_h, model);
+			return _generateFractalTree(width, height, iterations, angle, factor, zoom, rotation, padding_w, padding_h, model);
 		} 
-		catch (NumberFormatException e) 
+		catch (Exception e) 
 		{
 			//Parsing failed
 			System.out.println("generateFractalTree: " + parseFailedMessage.value);
 			//TODO create parse failed image
 			setFractalTreeModelParams("images/TODOparsefailedimage.png", parseFailedMessage.value, _width, _height, 
-									  _iterations, _angle, _factor, model);
+									  _iterations, _angle, _factor, _zoom, _rotation, model);
 			return "fractal";
 		}
 	}
 	
 	private String _generateFractalTree(int width, int height, int iterations, double angle, double factor, 
-										int padding_w, int padding_h, Model model)
+										double zoom, double rotation, int padding_w, int padding_h, Model model)
 	{
 		double angle_rad = Math.toRadians(angle);
-		
+		double zoomFactor = zoom / 100.0;
+		double rotation_rad = Math.toRadians(rotation);
 		FractalTree fractalTree = new FractalTree(width, height, iterations, angle_rad,
-												  factor, padding_w, padding_h);
+												  factor, zoomFactor, rotation_rad, padding_w, padding_h);
 		
 		//WARNING: since we create a new Fractal2DEntity for each request and don't recycle IDs, the IDs could skyrocket quickly.
 		FractalTreeEntity newEntity = new FractalTreeEntity(fractalTree);
@@ -106,7 +114,8 @@ public class GenerateFractalController
 			System.out.println("generateFractal2D: existing " + dbEntity.getClass().getSimpleName() + " found in database.");
 		}
 		setFractalTreeModelParams(toUse.getImageSrc(), toUse.getLoadingMessage(), String.valueOf(width), 
-								  String.valueOf(height), String.valueOf(iterations), String.valueOf(angle), String.valueOf(factor), model);
+								  String.valueOf(height), String.valueOf(iterations), String.valueOf(angle), 
+								  String.valueOf(factor), String.valueOf(zoom), String.valueOf(rotation), model);
 		return "fractal";
 	}
 	
@@ -124,6 +133,12 @@ public class GenerateFractalController
 		return DB.getFractalCircleEntities().findAll();
 	}
 	
+	//TODO temp for debugging
+	@GetMapping("/db-all-flowers")
+	public @ResponseBody Iterable<FractalFlowerEntity> listDB_fractalFlowers() {
+		return DB.getFractalFlowerEntities().findAll();
+	}
+	
 	/**
 	 * Queue a FractalCircle for async generation, and return fractal.html
 	 * with params fragment set to fragments/fractal-circle-params.html
@@ -132,6 +147,8 @@ public class GenerateFractalController
 	 * @param _iterations Number of fractal iterations to perform.
 	 * @param _satellites Number of child node 'satellites' to generate per iteration.
 	 * @param _factor Scaling factor for each child node in the fractal.
+	 * @param _zoom Percent multiplier to scale start element by relative to usable width & height.
+	 * @param _rotation Global rotation in degrees of the FractalCircle, starting from 3 o'clock CCW. 
 	 * @param _padding_w Horizontal padding in the image to generate.
 	 * @param _padding_h Vertical padding in the image to generate.
 	 * @param model Thymeleaf page model
@@ -144,6 +161,8 @@ public class GenerateFractalController
 			@RequestParam(name="i", required=false, defaultValue="4") String _iterations,
 			@RequestParam(name="satellites", required=false, defaultValue="3") String _satellites,
 			@RequestParam(name="factor", required=false, defaultValue="0.5") String _factor,
+			@RequestParam(name="z", required=false, defaultValue="20") String _zoom,
+			@RequestParam(name="rot", required=false, defaultValue="0.0") String _rotation,
 			@RequestParam(name="padding_w", required=false, defaultValue="40") String _padding_w,
 			@RequestParam(name="padding_h", required=false, defaultValue="40") String _padding_h,
 			Model model)
@@ -156,29 +175,33 @@ public class GenerateFractalController
 			int height = Helper.parseNonNegativeIntParam("Height", _height, parseFailedMessage);
 			int iterations = Helper.parseNonNegativeIntParam("Iterations", _iterations, parseFailedMessage);
 			int satellites = Helper.parseNonNegativeIntParam("Satellites", _satellites, parseFailedMessage);
-			double factor = Helper.parseDoubleParam("Scaling Sactor", _factor, parseFailedMessage);
+			double factor = Helper.parseNonNegativeDoubleParam("Scaling Sactor", _factor, parseFailedMessage);
+			double zoom = Helper.parseDoubleParam(0.0, Double.MAX_VALUE, "Zoom", _zoom, parseFailedMessage);
+			double rotation = Helper.parseDoubleParam("Rotation", _rotation, parseFailedMessage);
 			int padding_w = Helper.parseNonNegativeIntParam("padding_w", _padding_w, parseFailedMessage);
 			int padding_h = Helper.parseNonNegativeIntParam("padding_h", _padding_h, parseFailedMessage);
 			
 			//Parse success: perform actual generation
-			return _generateFractalCircle(width, height, iterations, satellites, factor, padding_w, 
-										  padding_h, model);
+			return _generateFractalCircle(width, height, iterations, satellites, factor, zoom, rotation, padding_w, padding_h, model);
 		} 
-		catch (NumberFormatException e) 
+		catch (Exception e) 
 		{
 			// Parsing failed
 			System.out.println("generateFractalCircle: " + parseFailedMessage.value);
 			//TODO create parse failed image
 			setFractalCircleModelParams("TODOparseerrorimage.png", parseFailedMessage.value, _width, _height, 
-										_iterations, _satellites, _factor, model);
+										_iterations, _satellites, _factor, _zoom, _rotation, model);
 			return "fractal";
 		}
 	}
 	
 	private String _generateFractalCircle(int width, int height, int iterations, int satellites,
-			double factor, int padding_w, int padding_h, Model model)
+			double factor, double zoom, double rotation, int padding_w, int padding_h, Model model)
 	{
-		FractalCircle fractalCircle = new FractalCircle(width, height, iterations, satellites, factor, padding_w, padding_h);
+		double zoomFactor = zoom / 100.0;
+		double rotation_rad = Math.toRadians(rotation);
+		FractalCircle fractalCircle = new FractalCircle(width, height, iterations, satellites, factor, 
+														zoomFactor, rotation_rad, padding_w, padding_h);
 
 		//WARNING: since we create a new Fractal2DEntity for each request and don't recycle IDs, the IDs could skyrocket quickly.
 		FractalCircleEntity newEntity = new FractalCircleEntity(fractalCircle);
@@ -194,7 +217,97 @@ public class GenerateFractalController
 			System.out.println("generateFractal2D: existing " + dbEntity.getClass().getSimpleName() + " found in database.");
 		}
 		setFractalCircleModelParams(toUse.getImageSrc(), toUse.getLoadingMessage(), String.valueOf(width), 
-									String.valueOf(height), String.valueOf(iterations), String.valueOf(satellites), String.valueOf(factor), model);
+									String.valueOf(height), String.valueOf(iterations), String.valueOf(satellites), String.valueOf(factor), 
+									String.valueOf(zoom), String.valueOf(rotation), model);
+		return "fractal";
+	}
+	
+	/**
+	 * Queue a FractalFlower for async generation, and return fractal.html
+	 * with params fragment set to fragments/fractal-flower-params.html
+	 * @param _width Width of the image to generate.
+	 * @param _height Height of the image to generate.
+	 * @param _iterations Number of fractal iterations to perform.
+	 * @param _petals Number of child node petals to generate per iteration.
+	 * @param _arcAngle Angle (degrees) that a petal arc should span (e.g. 180 is semicircle)
+	 * @param _factor Scaling factor for each child node in the fractal.
+	 * @param _zoom Percent multiplier to scale start element by relative to usable width & height.
+	 * @param _rotation Global rotation in degrees of the FractalFlower, starting from 3 o'clock CCW. 
+	 * @param _padding_w Horizontal padding in the image to generate.
+	 * @param _padding_h Vertical padding in the image to generate.
+	 * @param model Thymeleaf page model
+	 * @return fractal.html
+	 */
+	@GetMapping("/fractal-flower")
+	public String generateFractalFlower(
+			@RequestParam(name="w", required=false, defaultValue="700") String _width,
+			@RequestParam(name="h", required=false, defaultValue="500") String _height,
+			@RequestParam(name="i", required=false, defaultValue="5") String _iterations,
+			@RequestParam(name="petals", required=false, defaultValue="8") String _petals,
+			@RequestParam(name="arcAngle", required=false, defaultValue="180") String _arcAngle,
+			@RequestParam(name="factor", required=false, defaultValue="0.5") String _factor,
+			@RequestParam(name="power", required=false, defaultValue="2.0") String _power,
+			@RequestParam(name="z", required=false, defaultValue="25") String _zoom,
+			@RequestParam(name="rot", required=false, defaultValue="0.0") String _rotation,
+			@RequestParam(name="padding_w", required=false, defaultValue="40") String _padding_w,
+			@RequestParam(name="padding_h", required=false, defaultValue="40") String _padding_h,
+			Model model)
+	{
+		// Attempt to parse params to numerical types
+		Helper.Wrapper<String> parseFailedMessage = new Helper.Wrapper<String>("");
+		try 
+		{
+			int width = Helper.parseNonNegativeIntParam("Width", _width, parseFailedMessage);
+			int height = Helper.parseNonNegativeIntParam("Height", _height, parseFailedMessage);
+			int iterations = Helper.parseNonNegativeIntParam("Iterations", _iterations, parseFailedMessage);
+			int petals = Helper.parseNonNegativeIntParam("Petals", _petals, parseFailedMessage);
+			double arcAngle = Helper.parseDoubleParam("Arc Angle", _arcAngle, parseFailedMessage);
+			double factor = Helper.parseNonNegativeDoubleParam("Scaling Factor", _factor, parseFailedMessage);
+			double power = Helper.parseDoubleParam("Scaling Power", _power, parseFailedMessage);
+			double zoom = Helper.parseDoubleParam(0.0, Double.MAX_VALUE, "Zoom", _zoom, parseFailedMessage);
+			double rotation = Helper.parseDoubleParam("Rotation", _rotation, parseFailedMessage);
+			int padding_w = Helper.parseNonNegativeIntParam("padding_w", _padding_w, parseFailedMessage);
+			int padding_h = Helper.parseNonNegativeIntParam("padding_h", _padding_h, parseFailedMessage);
+			
+			//Parse success: perform actual generation
+			return _generateFractalFlower(width, height, iterations, petals, arcAngle, factor, power, zoom, rotation, padding_w, padding_h, model);
+		} 
+		catch (Exception e) 
+		{
+			// Parsing failed
+			System.out.println("generateFractalFlower: " + parseFailedMessage.value);
+			//TODO create parse failed image
+			setFractalFlowerModelParams("TODOparseerrorimage.png", parseFailedMessage.value, _width, _height, 
+										_iterations, _petals, _arcAngle, _factor, _power, _zoom, _rotation, model);
+			return "fractal";
+		}
+	}
+	
+	private String _generateFractalFlower(int width, int height, int iterations, int petals, double arcAngle, double factor,
+										  double power, double zoom, double rotation, int padding_w, int padding_h, Model model)
+	{
+		double arcAngle_rad = Math.toRadians(arcAngle);
+		double zoomFactor = zoom / 100.0;
+		double rotation_rad = Math.toRadians(rotation);
+		FractalFlower fractalFlower = new FractalFlower(width, height, iterations, petals, arcAngle_rad, factor, 
+				power, zoomFactor, rotation_rad, padding_w, padding_h);
+
+		//WARNING: since we create a new Fractal2DEntity for each request and don't recycle IDs, the IDs could skyrocket quickly.
+		FractalFlowerEntity newEntity = new FractalFlowerEntity(fractalFlower);
+
+		// Generate on separate thread using Fractal2DRunner, if match not found in DB
+		FractalFlowerEntity dbEntity = Fractal2DRunner_new.generate(newEntity, false);
+		FractalFlowerEntity toUse = newEntity;
+		if (dbEntity == null) // not in DB yet
+		{
+			toUse = newEntity;
+		} else { // already present in DB; in-progress or already generated
+			toUse = dbEntity;
+			System.out.println("generateFractal2D: existing " + dbEntity.getClass().getSimpleName() + " found in database.");
+		}
+		setFractalFlowerModelParams(toUse.getImageSrc(), toUse.getLoadingMessage(), String.valueOf(width), String.valueOf(height), 
+				String.valueOf(iterations), String.valueOf(petals), String.valueOf(arcAngle), String.valueOf(factor), 
+				String.valueOf(power), String.valueOf(zoom), String.valueOf(rotation), model);
 		return "fractal";
 	}
 
@@ -233,6 +346,12 @@ public class GenerateFractalController
 					return ResponseEntity.ok(dbEntity2.get().getLoadingMessage());
 				}
 				break;
+			case pageTitle_FractalFlower:
+				Optional<FractalFlowerEntity> dbEntity3 = DB.getFractalFlowerEntities().findById(id);
+				if(dbEntity3.isPresent()) {
+					return ResponseEntity.ok(dbEntity3.get().getLoadingMessage());
+				}
+				break;
 			default:
 				return ResponseEntity.badRequest().body("Invalid param pageTitle set; use fractal.html's title as the parameter.");
 		}
@@ -240,29 +359,46 @@ public class GenerateFractalController
 	}
 	
 	private void setFractalTreeModelParams(String imageSrc, String loadingMessage, String width, 
-										   String height, String iterations, String angle, String factor, Model model)
+										   String height, String iterations, String angle, String factor, 
+										   String zoom, String rotation, Model model)
 	{
 		setFractal2DModelParams("Fractal Tree", "/fractal-tree", imageSrc,
 				"fragments/fractal-tree-params.html", loadingMessage, 
-				width, height, iterations, model);
+				width, height, iterations, zoom, rotation, model);
 		// Set FractalTree-specific attributes
 		model.addAttribute("angle", angle);
 		model.addAttribute("factor", factor);
 	}
 	
 	private void setFractalCircleModelParams(String imageSrc, String loadingMessage, String width, 
-											 String height, String iterations, String satellites, String factor, Model model)
+											 String height, String iterations, String satellites, String factor, 
+											 String zoom, String rotation, Model model)
 	{
 		setFractal2DModelParams("Fractal Circles", "/fractal-circle", imageSrc,
-				"fragments/fractal-circle-params.html", loadingMessage, 
-				width, height, iterations, model);
+							    "fragments/fractal-circle-params.html", loadingMessage, 
+							    width, height, iterations, zoom, rotation, model);
 		// Set FractalCircle-specific attributes
 		model.addAttribute("satellites", satellites);
 		model.addAttribute("factor", factor);
 	}
 	
+	private void setFractalFlowerModelParams(String imageSrc, String loadingMessage, String width, 
+			 String height, String iterations, String petals, String arcAngle, String factor, String power,
+			 String zoom, String rotation, Model model)
+	{
+		setFractal2DModelParams("Fractal Flower", "/fractal-flower", imageSrc, 
+								"fragments/fractal-flower-params.html", loadingMessage, 
+								width, height, iterations, zoom, rotation, model);
+		// Set FractalFlower-specific attributes
+		model.addAttribute("petals", petals);
+		model.addAttribute("arcAngle", arcAngle);
+		model.addAttribute("factor", factor);
+		model.addAttribute("power", power);
+	}
+	
 	private void setFractal2DModelParams(String title, String action, String imagePath, String params_page, 
-			   							 String loadingMessage, String width, String height, String iterations, Model model)
+			   							 String loadingMessage, String width, String height, String iterations, 
+			   							 String zoom, String rotation, Model model)
 	{
 		model.addAttribute("title", title);
 		model.addAttribute("action", action);
@@ -272,6 +408,8 @@ public class GenerateFractalController
 		model.addAttribute("width", width);
 		model.addAttribute("height", height);
 		model.addAttribute("iterations", iterations);
+		model.addAttribute("zoom", zoom);
+		model.addAttribute("rotation", rotation);
 		model.addAttribute("loadingMessage", loadingMessage);
 		model.addAttribute("parseFailedMessage", "");
 	}
