@@ -12,6 +12,7 @@
 	<artifactId>Fractals</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>Fractals</name>
+	<packaging>war</packaging>
 	<description>Fractals Spring Framework Project</description>
 
 	<properties>
@@ -44,6 +45,18 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-tomcat</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.tomcat.embed</groupId>
+			<artifactId>tomcat-embed-jasper</artifactId>
+			<scope>provided</scope>
+		</dependency>
 		
 		<dependency>
             <groupId>org.springframework.boot</groupId>
